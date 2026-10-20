@@ -1,114 +1,62 @@
 # PragYantra
 
-PragYantra is a simple software project designed to simulate a humanoid robot with vision, hearing, speech, and memory functionalities. This project aims to create a flexible platform for experimenting with artificial intelligence and human-machine interaction. As of now, it is more like an LLM, but with extended capabilities, enabling it to see, hear and engage in verbal communication.
+PragYantra explores software for an embodied assistant: perception, contextual
+state, memory, decision-making, speech, and interfaces to physical devices.
 
-![PragYantra's Architecture](arch.jpg)
+The project is being rebuilt from a 2024 Python prototype. **The new implementation
+currently contains an installable package, a lightweight CLI, and architecture
+boundaries. Assistant behavior and device/model integrations are not implemented
+yet.** The original code and README are preserved in [legacy/](legacy/README.md).
 
-## Features
+## Development
 
-- **Vision**: PragYantra simulates vision capabilities, allowing it to process live image captions. While it currently doesn't make decisions based on visual data, this feature lays the foundation for future development in this area.
-- **Hearing**: PragYantra can perceive sounds and respond in realtime accordingly.
-- **Speech**: Capable of generating simulated speech output and communicate with users in natural language.
-- **Memory**: It has very limited memory capabilities, allowing it to store and recall information from recent interactions. Currently, I'm working on integrating a vector database to enhance the memory feature, providing more human-like memory capabilities, like short-term and long-term memories, enabling it to simulate complex recall tasks.
+Use **uv** for all Python work. The initial development baseline is Python 3.12;
+hardware and provider-specific dependencies will be validated as they are added.
 
-## Technical details
-
-I prioritized PragYantra to have offline capabilities while also integrating online functionalities. To achieve this, all components of the project were designed to have offline capabilities, with online functionalities available as optional features. While using offline mode may require a stronger device for faster inference, the project is fully functional and performs admirably under these conditions.
-
-The backbone of PragYantra consists of various open-source models for tasks such as text-to-speech, speech-to-text, text-to-text, and image-to-text conversion. These models serve as the building blocks upon which PragYantra's architecture is built, with additional capabilities and concurrency seamlessly integrated to enhance overall performance and user experience.
-
-## So...what does PragYantra mean?
-
-PragYantra, derived from Sanskrit, is a fusion of two words: "Prag" meaning intelligent or wise, and "Yantra" referring to machine or robot. So, put together, PragYantra embodies the concept of an intelligent machine, reflecting the project's goal of creating a flexible platform for experimenting with AI and human-machine interaction.
-
-## Setup and Installation
-
-To set up the project, follow these steps:
-
-1. Clone the repository:
-
-   ```
-   git clone https://github.com/sri0606/pragyantra.git
-   ```
-
-2. Navigate to the project directory:
-
-   ```
-   cd pragyantra
-   ```
-
-3. Run the setup script:
-
-   - Run the python setup script:
-     ```
-     python setup.py
-     ```
-
-   OR
-
-   - On Unix-like systems (like Linux or macOS):
-     ```
-     chmod +x setup.sh
-     ./setup.sh
-     ```
-   - On Windows, using Git Bash:
-     ```
-     bash setup.sh
-     ```
-
-The setup script will install the dependencies, download the required models, and create the necessary directories.
-
-## Run the program and interact
-
-For help, run the following command:
-
-```
-python main.py --help
+```bash
+uv sync --locked
+uv run pragyantra --help
+uv run pragyantra --version
+uv run ruff check .
+uv run ruff format --check .
+uv build
 ```
 
-Example commands:
+The new package has no runtime dependencies. Development setup does not install
+the archived ML stack, download model weights, open devices, or call hosted APIs.
+There are no behavior tests yet; see [tests/README.md](tests/README.md).
 
-- Offline mode
+## Repository layout
 
-  ```bash
-  python main.py --interpreter_model llama3_8B --offline_mode --speaker_model pyttsx3
-  ```
-
-- Online mode
-
-  ```bash
-  python main.py --interpreter_model llama3-70B-8192 --speaker_model pyttsx3
-
-  or
-
-  python main.py --interpreter_model mixtral-8x7b-32768 --speaker_model 11labs
-  ```
-
-## Citations and Acknowledgements
-
-```bitbtex
-@misc {nlp_connect_2022,
-   author = { {NLP Connect} },
-   title = { vit-gpt2-image-captioning (Revision 0e334c7) },
-   year = 2022,
-   url = { https://huggingface.co/nlpconnect/vit-gpt2-image-captioning },
-   doi = { 10.57967/hf/0222 },
-   publisher = { Hugging Face }
-   }
-
-@article{pratap2023mms,
-   title={Scaling Speech Technology to 1,000+ Languages},
-   author={Vineel Pratap and Andros Tjandra and Bowen Shi and Paden Tomasello and Arun Babu and Sayani Kundu and Ali Elkahky and Zhaoheng Ni and Apoorv Vyas and Maryam Fazel-Zarandi and Alexei Baevski and Yossi Adi and Xiaohui Zhang and Wei-Ning Hsu and Alexis Conneau and Michael Auli},
-   journal={arXiv},
-   year={2023}
-   }
-
-@misc{li2021trocr,
-   title={TrOCR: Transformer-based Optical Character Recognition with Pre-trained Models},
-   author={Minghao Li and Tengchao Lv and Lei Cui and Yijuan Lu and Dinei Florencio and Cha Zhang and Zhoujun Li and Furu Wei},
-   year={2021},
-   eprint={2109.10282},
-   archivePrefix={arXiv},
-   primaryClass={cs.CL}
-   }
+```text
+src/pragyantra/
+  inputs/         Cameras, microphones, sensors, and simulated observations
+  application/    Shared models, interfaces, world state, and behavior coordination
+  outputs/        Speech, actuators, and simulated actions
+  providers/      Third-party APIs and external model/service implementations
+  cli.py          Startup wiring and the development CLI
+  __main__.py     Python module entry point
+tests/            Tests added alongside implemented behaviors
+docs/             Architecture and engineering decisions
+legacy/           Archived prototype; excluded from the new package and linting
 ```
+
+These packages establish boundaries, not completed subsystems. See
+[the architecture guide](docs/architecture.md) for dependency rules, hardware
+boundaries, and the first proposed behavior.
+
+Python is used for the initial application. C++ is the selected companion language
+for firmware or native components when a concrete requirement justifies them.
+No hardware platform or firmware project has been selected yet.
+
+## Model deployment
+
+Hosted APIs are acceptable for vision and other model capabilities. Local models
+are also candidates. The application should consume capability interfaces rather
+than provider SDK types. Implementations live in `providers/`, so selecting a
+provider does not redesign the core.
+Provider selection and end-to-end latency/resource measurements remain future work.
+
+## License
+
+See [LICENSE](LICENSE) for the existing GNU GPL version 3 license.

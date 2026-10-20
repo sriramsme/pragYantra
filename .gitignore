@@ -163,3 +163,10 @@ models/
 memory_stream/
 notes.txt
 *.pkl
+
+# Modern development tooling and runtime data
+.ruff_cache/
+.uv-cache/
+data/
+.env.*
+!.env.example
