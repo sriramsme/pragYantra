@@ -4,9 +4,10 @@ PragYantra explores software for an embodied assistant: perception, contextual
 state, memory, decision-making, speech, and interfaces to physical devices.
 
 The project is being rebuilt from a 2024 Python prototype. **The new implementation
-currently contains an installable package, a lightweight CLI, and architecture
-boundaries. Assistant behavior and device/model integrations are not implemented
-yet.** The original code and README are preserved in [legacy/](legacy/README.md).
+has a runnable, tested simulation: visual observations update current context, and
+touch events request a description with missing/stale handling. Real devices,
+speech synthesis, and model providers are not connected yet.** The original code
+and README are preserved in [legacy/](legacy/README.md).
 
 ## Development
 
@@ -17,6 +18,7 @@ hardware and provider-specific dependencies will be validated as they are added.
 uv sync --locked
 uv run pragyantra --help
 uv run pragyantra --version
+uv run pytest -q
 uv run ruff check .
 uv run ruff format --check .
 uv build
@@ -24,7 +26,32 @@ uv build
 
 The new package has no runtime dependencies. Development setup does not install
 the archived ML stack, download model weights, open devices, or call hosted APIs.
-There are no behavior tests yet; see [tests/README.md](tests/README.md).
+Tests use simulated input/output and a logical clock; see
+[tests/README.md](tests/README.md).
+
+## Run the simulation
+
+```bash
+uv run pragyantra demo
+uv run pragyantra demo --json
+```
+
+The default scenario produces:
+
+```text
+[unavailable] I don't have a visual observation yet.
+[current] The latest visual observation describes: A mug and a notebook are on a desk.
+[stale] My last visual observation is too old to describe now.
+```
+
+These are scripted observations, not actual scene recognition. Simulated time
+advances without waiting; the command records text responses rather than playing
+audio. JSON lines include the touch source/time, visual evidence, response time,
+and visual age. An older visual result delivered late is ignored.
+
+`--max-visual-age SECONDS` changes the freshness threshold (default: 5 seconds,
+inclusive). The threshold is a demo policy, not an experimentally established
+sensor requirement. Increasing it can change the final response to `current`.
 
 ## Repository layout
 
@@ -41,9 +68,9 @@ docs/             Architecture and engineering decisions
 legacy/           Archived prototype; excluded from the new package and linting
 ```
 
-These packages establish boundaries, not completed subsystems. See
+These packages establish boundaries around the initial simulated behavior. See
 [the architecture guide](docs/architecture.md) for dependency rules, hardware
-boundaries, and the first proposed behavior.
+boundaries, and current limitations.
 
 Python is used for the initial application. C++ is the selected companion language
 for firmware or native components when a concrete requirement justifies them.

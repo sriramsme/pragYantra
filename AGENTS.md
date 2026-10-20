@@ -35,14 +35,14 @@ proposed work; do not invent results or performance measurements.
 
 ## Current repository
 
-- `src/pragyantra/`: installable replacement package; currently a scaffold only.
+- `src/pragyantra/`: installable replacement package with a simulated first behavior.
   `inputs/` acquires observations; `application/` owns shared values/interfaces,
   world state, behaviors, and lifecycle; `outputs/` executes speech/device requests;
   `providers/` wraps third-party APIs and external model/service implementations.
   Root `cli.py` wires components and exposes the launcher.
 - `docs/architecture.md`: responsibilities, dependency rules, deployment boundaries,
-  and the first proposed behavior. Keep it aligned with the implementation.
-- `tests/`: testing guidance; no behavior tests yet.
+  and current behavior/limitations. Keep it aligned with the implementation.
+- `tests/`: visual-context behavior, timing, lifecycle, and CLI tests using pytest.
 - `legacy/`: original application, requirements, scripts, README, notebook, and
   architecture image. It is reference material, excluded from the new package and
   linting. Its local `AGENTS.md` contains the historical audit.
@@ -70,11 +70,17 @@ Keep modules grouped by capability when they grow. Do not add large placeholder
 hierarchies or recreate every legacy feature. The archive may be deleted once its
 useful behavior and historical references have been reviewed.
 
-The first proposed behavior uses simulated visual and touch observations: a touch
-requests current visual context, with explicit unavailable/stale handling. It has
-not been implemented. Add real devices and providers after independently testing
-that path. Define freshness, timeouts, bounded work, and shutdown when implementing
-concurrent components. Distinguish acquisition time from processing completion.
+The first behavior uses simulated visual and touch observations: a touch requests
+current visual context, with explicit unavailable/stale handling. Run it with
+`uv run pragyantra demo` or add `--json` for response evidence. It uses a logical
+clock and records text rather than producing audio. It does not recognize images.
+World state retains one latest acquired scene; it is not a complete world model.
+
+The runtime consumes one async stream and awaits each output. Resource contexts
+close on completion, failure, and cancellation. Live sensor multiplexing, parallel
+inference, speech interruption, and device queue bounds are not implemented. Define
+those semantics when adding real adapters. Preserve acquisition/receipt/response
+time distinctions; freshness must include inference and processing delay.
 
 For hardware, state assumptions and consult datasheets/official documentation
 before committing to electrical interfaces. Keep deadline-sensitive control and
@@ -89,16 +95,19 @@ From the repository root:
 uv sync --locked
 uv run pragyantra --help
 uv run pragyantra --version
+uv run pragyantra demo
+uv run pytest -q
 uv run ruff check .
 uv run ruff format --check .
 uv build
 ```
 
-The package currently has no runtime dependencies. Ruff is the development tool;
-no test runner or CI workflow has been added. Add focused tests for implemented
-behavior, using fake providers/devices and temporary storage so normal tests need
-no credentials, hardware, paid calls, or downloads. Do not test empty scaffolding
-just to increase test counts. Introduce test tools through `uv` when needed.
+The package currently has no runtime dependencies. Ruff and pytest are development
+tools; no CI workflow has been added. Add focused tests for implemented behavior,
+using fake providers/devices and temporary storage so normal tests need no
+credentials, hardware, paid calls, or downloads. Async tests use `asyncio.run` and
+logical clocks rather than wall-clock sleeps. Do not test empty scaffolding just
+to increase test counts. Introduce additional tools through `uv` when needed.
 
 Keep edits scoped. Run relevant checks and `git diff --check`; report what was
 verified and what remains untested. Never claim package checks validate an actual

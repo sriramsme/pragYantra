@@ -1,7 +1,9 @@
 # Architecture foundation
 
-Status: initial package structure. No perception, memory, behavior engine, model
-provider, or hardware integration has been implemented in the replacement yet.
+Status: first simulated behavior implemented and tested. The replacement maintains
+one latest visual observation and responds to touch using a deterministic policy.
+Actual perception, persistent memory, model providers, and hardware integration
+have not been implemented.
 
 ## Decisions made
 
@@ -87,17 +89,56 @@ boundary. Higher-level inference may select goals or actions without becoming a
 dependency of the physical control loop. Evaluate ARM dependency availability and
 resource use on the selected target before claiming deployment support.
 
-## First proposed behavior
+## First implemented behavior
 
-1. Simulated visual observations update current state.
-2. A simulated touch requests the latest visual context.
-3. A simulated output receives a response, or an explicit unavailable/stale result.
-4. Record enough timing and source information to explain the result.
+Run `uv run pragyantra demo` or add `--json` for response evidence.
 
-Verify normal behavior, missing/stale inputs, and clean shutdown before attaching
-devices. Start with deterministic behavior; add decision-model judgments where the
-chosen behavior requires semantic interpretation. Grow memory, asynchronous
-scheduling, and persistence from demonstrated needs.
+- `application/models.py`: immutable visual/touch observations, a delivery envelope,
+  and responses containing status and supporting visual evidence. Acquisition,
+  receipt, and response time are separate. Timestamps require timezones.
+- `application/world_state.py`: retain the latest acquired visual observation.
+  Older results cannot replace it; equal acquisition times keep the first result.
+  This is one scene context, not object tracking or a full environment model.
+- `application/behavior.py`: a touch requests current context. A description is
+  usable when its acquisition age at response time is at most the configured
+  threshold. Missing or stale observations produce explicit fallback responses;
+  stale descriptions remain available as evidence, not as current output wording.
+- `application/interfaces.py`: async observation-source and response-output
+  protocols. Resource ownership uses asynchronous context managers.
+- `application/runtime.py`: process one event stream, update context, and deliver
+  responses. Use an injected clock, defaulting to UTC wall time. Enter and release
+  input/output contexts even on processing errors, partial startup, or cancellation.
+- `inputs/simulated.py`: finite replay with a logical clock and cancellation
+  checkpoints. It includes a delayed older scene and needs no real-time waits.
+- `outputs/simulated.py`: record response requests in memory. This is a finite
+  simulation/test tool, not production storage or actual speech playback.
+
+The demo returns unavailable, current, and stale responses with the default
+five-second threshold. That threshold illustrates policy; it is not a measured
+hardware requirement. The core has no model-provider dependency for this rule.
+
+### Timing and scope limits
+
+All timestamps must share a comparable clock. An observation cannot be delivered
+before acquisition, an event cannot arrive ahead of the processing clock, and
+delivery envelopes must be in nondecreasing receipt order. Acquisition order may
+differ due to inference latency. Freshness includes processing delay; recent
+delivery does not make an old camera frame fresh. Clock synchronization across
+devices is not implemented.
+
+The runner awaits each response before consuming the next event. It does not yet
+multiplex live sensors, schedule inference in parallel, interrupt speech, or enforce
+queue bounds/timeouts for actual devices. Those responsibilities must be designed
+when real adapters are introduced; this simulation does not establish control-loop
+timing or real-time performance. Output delivery is not retried automatically.
+
+Tests cover freshness boundaries, missing input, delayed/out-of-order acquisition,
+invalid timing, and cleanup on completion, input/output errors, partial startup,
+and cancellation. No accuracy, hardware, or hosted-service results are claimed.
+
+Next, implement a real acquisition/perception path behind an application interface.
+Add decision-model judgments when a chosen behavior requires semantic
+interpretation. Grow memory, scheduling, and persistence from demonstrated needs.
 
 ## Legacy retirement
 
