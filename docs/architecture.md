@@ -2,8 +2,11 @@
 
 Status: first simulated behavior implemented and tested. The replacement maintains
 one latest visual observation and responds to touch using a deterministic policy.
-Actual perception, persistent memory, model providers, and hardware integration
-have not been implemented.
+An image-file path now obtains a description through OpenAI behind a vision
+interface and feeds it into the same behavior. Provider HTTP handling is tested
+with mocked responses; a manual live API smoke test was reported successful, while
+systematic accuracy and latency evaluation remain outstanding. Persistent memory
+and hardware integration have not been implemented.
 
 ## Decisions made
 
@@ -58,9 +61,14 @@ belong in `providers/`. Speech synthesis can use a provider while playback remai
 an output responsibility. Providers do not select overall application behavior or
 directly control devices.
 
-Add the first vision contract when implementing a specific task, such as scene
-description. Define the input/output the application actually needs rather than
-wrapping every API feature. Normalize results into shared application values;
+The first vision contract is `VisionProvider.describe(ImageFrame)`, returning a
+`SceneDescription`. `application/perception.py` turns it into a visual observation
+without changing acquisition time. The OpenAI implementation lives in
+`providers/openai.py`; the image-file loader lives in `inputs/image.py`. See
+[the execution walkthrough](vision.md).
+
+Define the input/output the application actually needs rather than wrapping every
+API feature. Normalize results into shared application values;
 keep SDK objects, authentication, retries, timeouts, and service-specific response
 parsing in providers, with credentials supplied through startup configuration.
 Local inference implementations can also live in providers behind the same
@@ -74,8 +82,8 @@ integration is implemented. Evaluate latency and accuracy on representative inpu
 
 Decision models can provide bounded semantic judgments; generative models can
 provide conversation and open-ended reasoning. Known thresholds, calculations,
-and device constraints belong in code. No provider is selected or required by the
-scaffold, and importing the package must not create clients or perform I/O.
+and device constraints belong in code. The simulation does not require a provider,
+and importing the package must not create clients or perform I/O.
 
 ## Hardware boundary
 
@@ -136,9 +144,12 @@ Tests cover freshness boundaries, missing input, delayed/out-of-order acquisitio
 invalid timing, and cleanup on completion, input/output errors, partial startup,
 and cancellation. No accuracy, hardware, or hosted-service results are claimed.
 
-Next, implement a real acquisition/perception path behind an application interface.
-Add decision-model judgments when a chosen behavior requires semantic
-interpretation. Grow memory, scheduling, and persistence from demonstrated needs.
+The image-file command now provides an acquisition/perception path behind an
+application interface; its touch and output remain simulated. Unlike the default
+demo, it uses the real clock and includes inference time in freshness. Next steps
+include live validation with a configured API key and representative images, then
+camera acquisition. Add decision-model judgments when a chosen behavior requires
+semantic interpretation. Grow memory and scheduling from demonstrated needs.
 
 ## Legacy retirement
 

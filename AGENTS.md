@@ -31,18 +31,20 @@ proposed work; do not invent results or performance measurements.
 - Decision models such as Jev and OpenAI Decisions are candidates for bounded
   semantic judgments. Keep known rules/calculations in code, evaluate judgments
   on representative inputs, and use generative models when the behavior needs them.
-  No provider has been selected or integrated yet.
+  OpenAI Responses vision is integrated behind `VisionProvider`; decision-model
+  providers are not integrated yet.
 
 ## Current repository
 
-- `src/pragyantra/`: installable replacement package with a simulated first behavior.
+- `src/pragyantra/`: replacement package with a simulation and image-file vision.
   `inputs/` acquires observations; `application/` owns shared values/interfaces,
   world state, behaviors, and lifecycle; `outputs/` executes speech/device requests;
   `providers/` wraps third-party APIs and external model/service implementations.
   Root `cli.py` wires components and exposes the launcher.
 - `docs/architecture.md`: responsibilities, dependency rules, deployment boundaries,
   and current behavior/limitations. Keep it aligned with the implementation.
-- `tests/`: visual-context behavior, timing, lifecycle, and CLI tests using pytest.
+- `docs/vision.md`: step-by-step image execution, configuration, and timing limits.
+- `tests/`: behavior, timing, lifecycle, image validation, mocked SDK, and CLI tests.
 - `legacy/`: original application, requirements, scripts, README, notebook, and
   architecture image. It is reference material, excluded from the new package and
   linting. Its local `AGENTS.md` contains the historical audit.
@@ -76,6 +78,24 @@ current visual context, with explicit unavailable/stale handling. Run it with
 clock and records text rather than producing audio. It does not recognize images.
 World state retains one latest acquired scene; it is not a complete world model.
 
+`uv run --env-file .env pragyantra see IMAGE --json` reads and normalizes a local
+image and explicitly sends it to OpenAI. The provider uses Responses with
+`gpt-5.6-luna` by default, low image detail, no reasoning, a short output limit,
+`store=False`, and no automatic retries. These are configurable engineering choices,
+not measured accuracy or performance claims. API credentials stay in environment
+variables or ignored `.env`; `.env.example` contains placeholders only.
+
+Image acquisition, the provider contract, and interpretation-to-observation mapping
+are separate. Provider/model and requested image detail are retained without
+inventing confidence. `--image-detail` changes provider preprocessing; the file
+loader still normalizes uploads to at most 1024 pixels on the longest edge.
+For files, the default timestamp is pipeline acquisition, not the photo's historical
+capture time; `--captured-at` accepts a known time. This path uses the real clock,
+preserves acquisition time through inference, and retains simulated touch/output.
+A manual live API smoke test was reported successful on October 20, 2026;
+systematic accuracy and latency evaluation remain outstanding. No Google Cloud
+setup is required by the current implementation.
+
 The runtime consumes one async stream and awaits each output. Resource contexts
 close on completion, failure, and cancellation. Live sensor multiplexing, parallel
 inference, speech interruption, and device queue bounds are not implemented. Define
@@ -102,8 +122,9 @@ uv run ruff format --check .
 uv build
 ```
 
-The package currently has no runtime dependencies. Ruff and pytest are development
-tools; no CI workflow has been added. Add focused tests for implemented behavior,
+Runtime dependencies are OpenAI and Pillow. Ruff, pytest, and an SDK-compatible
+mock HTTP transport are development tools; no CI workflow has been added.
+Add focused tests for implemented behavior,
 using fake providers/devices and temporary storage so normal tests need no
 credentials, hardware, paid calls, or downloads. Async tests use `asyncio.run` and
 logical clocks rather than wall-clock sleeps. Do not test empty scaffolding just

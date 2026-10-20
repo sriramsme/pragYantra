@@ -1,6 +1,6 @@
 """Immutable observations and responses shared across component boundaries."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import StrEnum
 
@@ -24,11 +24,43 @@ class VisualObservation:
     source: str
     observed_at: datetime
     description: str
+    provider: str | None = None
+    model: str | None = None
+    image_detail: str | None = None
 
     def __post_init__(self) -> None:
         _validate_observation(self.source, self.observed_at)
         if not self.description.strip():
             raise ValueError("Visual description must not be empty")
+
+
+@dataclass(frozen=True, slots=True)
+class ImageFrame:
+    """Acquired image bytes; providers must not replace their acquisition time."""
+
+    source: str
+    observed_at: datetime
+    data: bytes = field(repr=False)
+    mime_type: str = "image/jpeg"
+
+    def __post_init__(self) -> None:
+        _validate_observation(self.source, self.observed_at)
+        if not self.data:
+            raise ValueError("Image data must not be empty")
+
+
+@dataclass(frozen=True, slots=True)
+class SceneDescription:
+    """Provider-independent interpretation with provider/model provenance."""
+
+    text: str
+    provider: str
+    model: str
+    image_detail: str | None = None
+
+    def __post_init__(self) -> None:
+        if not all(value.strip() for value in (self.text, self.provider, self.model)):
+            raise ValueError("Description and provider/model names must not be empty")
 
 
 @dataclass(frozen=True, slots=True)
