@@ -3,7 +3,8 @@
 Status: implemented with mocked API tests and a successful manual live API smoke
 test. A [three-image check](experiments/2026-10-20-vision-smoke.md) records actual
 descriptions and timing; systematic evaluation remains outstanding. This path
-reads an image file, not a live camera; touch and text output remain simulated.
+reads an image file; the optional [webcam adapter](webcam.md) now provides another
+acquisition path. Touch and text output remain simulated.
 
 ## Run it
 
@@ -44,7 +45,8 @@ required for `demo` or tests. A missing key produces an actionable error.
 
 To add another provider, implement `VisionProvider.describe` and wire it at startup.
 Image loading, world state, and touch behavior should not need provider-specific
-changes. Raw frame capture from a camera would replace file acquisition separately.
+changes. `inputs/webcam.py` already supplies the same frame value for a single
+laptop/USB camera capture; camera acquisition and perception remain separate.
 
 ## Timing is part of the behavior
 

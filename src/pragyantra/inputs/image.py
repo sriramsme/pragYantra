@@ -14,6 +14,28 @@ MAX_PIXELS = 16_000_000
 MAX_EDGE = 1024
 
 
+def frame_from_image(
+    image: Image.Image, *, source: str, observed_at: datetime
+) -> ImageFrame:
+    """Normalize a decoded image from any adapter into the shared frame value."""
+    require_aware(observed_at, "image capture time")
+    if image.width * image.height > MAX_PIXELS:
+        raise ValueError("Image exceeds the 16-megapixel decode limit")
+    image.load()
+    image = ImageOps.exif_transpose(image)
+    image.thumbnail((MAX_EDGE, MAX_EDGE))
+    if "A" in image.getbands() or "transparency" in image.info:
+        rgba = image.convert("RGBA")
+        background = Image.new("RGBA", rgba.size, "white")
+        image = Image.alpha_composite(background, rgba)
+    # A new image prevents EXIF/XMP/comment metadata being re-emitted.
+    clean = Image.new("RGB", image.size)
+    clean.paste(image.convert("RGB"))
+    buffer = BytesIO()
+    clean.save(buffer, format="JPEG", quality=85)
+    return ImageFrame(source, observed_at, buffer.getvalue())
+
+
 def load_image(path: Path, *, observed_at: datetime | None = None) -> ImageFrame:
     """Validate PNG/JPEG/WebP and return an oriented, bounded JPEG without metadata.
 
@@ -40,20 +62,9 @@ def load_image(path: Path, *, observed_at: datetime | None = None) -> ImageFrame
                     raise ValueError("Use a PNG, JPEG, or WebP image")
                 if getattr(original, "n_frames", 1) != 1:
                     raise ValueError("Animated images are not supported")
-                if original.width * original.height > MAX_PIXELS:
-                    raise ValueError("Image exceeds the 16-megapixel decode limit")
-                original.load()
-                image = ImageOps.exif_transpose(original)
-                image.thumbnail((MAX_EDGE, MAX_EDGE))
-                if "A" in image.getbands() or "transparency" in image.info:
-                    rgba = image.convert("RGBA")
-                    background = Image.new("RGBA", rgba.size, "white")
-                    image = Image.alpha_composite(background, rgba)
-                # A new image prevents EXIF/XMP/comment metadata being re-emitted.
-                clean = Image.new("RGB", image.size)
-                clean.paste(image.convert("RGB"))
-                buffer = BytesIO()
-                clean.save(buffer, format="JPEG", quality=85)
+                return frame_from_image(
+                    original, source=f"file:{path.name}", observed_at=timestamp
+                )
     except (
         UnidentifiedImageError,
         OSError,
@@ -61,4 +72,3 @@ def load_image(path: Path, *, observed_at: datetime | None = None) -> ImageFrame
         Image.DecompressionBombError,
     ) as exc:
         raise ValueError("Image could not be decoded safely") from exc
-    return ImageFrame(f"file:{path.name}", timestamp, buffer.getvalue())

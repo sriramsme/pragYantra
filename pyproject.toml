@@ -13,6 +13,11 @@ dependencies = [
 [project.scripts]
 pragyantra = "pragyantra.cli:main"
 
+[project.optional-dependencies]
+webcam = [
+    "opencv-python-headless>=5.0.0.93",
+]
+
 [build-system]
 requires = ["uv_build>=0.11.24,<0.12.0"]
 build-backend = "uv_build"

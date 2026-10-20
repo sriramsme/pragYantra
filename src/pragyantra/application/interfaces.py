@@ -23,5 +23,9 @@ class VisionProvider(Protocol):
     async def describe(self, image: ImageFrame) -> SceneDescription: ...
 
 
+class ImageSource(Protocol):
+    async def read(self) -> ImageFrame: ...
+
+
 class VisionError(RuntimeError):
     """An actionable provider error safe to display without SDK request details."""

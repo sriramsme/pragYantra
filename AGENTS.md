@@ -36,7 +36,8 @@ proposed work; do not invent results or performance measurements.
 
 ## Current repository
 
-- `src/pragyantra/`: replacement package with a simulation and image-file vision.
+- `src/pragyantra/`: replacement package with a simulation, image-file vision,
+  and optional one-shot/continuous laptop/USB webcam input.
   `inputs/` acquires observations; `application/` owns shared values/interfaces,
   world state, behaviors, and lifecycle; `outputs/` executes speech/device requests;
   `providers/` wraps third-party APIs and external model/service implementations.
@@ -44,6 +45,7 @@ proposed work; do not invent results or performance measurements.
 - `docs/architecture.md`: responsibilities, dependency rules, deployment boundaries,
   and current behavior/limitations. Keep it aligned with the implementation.
 - `docs/vision.md`: step-by-step image execution, configuration, and timing limits.
+- `docs/webcam.md`: optional camera setup, observation loop, and capture limits.
 - `tests/`: behavior, timing, lifecycle, image validation, mocked SDK, and CLI tests.
 - `legacy/`: original application, requirements, scripts, README, notebook, and
   architecture image. It is reference material, excluded from the new package and
@@ -97,10 +99,38 @@ A manual live API smoke test and a three-image check succeeded on October 20,
 and timing; systematic accuracy and latency evaluation remain outstanding.
 No Google Cloud setup is required by the current implementation.
 
+`uv run --extra webcam --env-file .env pragyantra see --webcam 0 --json` captures
+one frame through `inputs/webcam.py`. OpenCV is optional and imported on capture,
+not at module import. File and webcam adapters share image normalization and
+return `ImageFrame`; future camera adapters should preserve that boundary. The
+webcam is released before inference, including on acquisition/normalization errors.
+Its timestamp is host read-start, not sensor exposure time; buffering can conceal
+older frames. Blocking driver calls can delay cancellation and release, and the
+provider timeout does not bound acquisition. Automated tests use synthetic pixels
+and fake devices. A manual webcam smoke test was reported successful on October 20,
+2026; device details, repeated-run reliability, and capture timing were not recorded.
+
+`uv run --extra webcam --env-file .env pragyantra watch --interval 5 --count 3 --json`
+uses `WebcamStream` and `application/observation_loop.py:VisualObservationLoop`.
+One camera worker owns open/read/release; a producer replaces one pending raw
+frame while inference or pacing is busy. Only selected frames are normalized.
+The application consumes `ImageSource` and `VisionProvider`, performs serial
+inference, preserves acquisition/receipt timing, and retains latest context in
+`WorldState`. The interval is a delay after result handling, not a fixed rate.
+CLI output streams immediately without retaining a response history. A finite
+count stops normally; omitting it runs until Ctrl+C. Errors stop without retries.
+Cleanup stops the producer, waits for active device work, releases on the same
+worker, and joins it. Driver calls can delay shutdown. Continuous operation has
+automated tests and a successful manual smoke test reported on October 20, 2026;
+test duration, device details, settings, and timings were not recorded. Prior descriptions are not
+fed back into prompts; temporal context remains a separate candidate experiment.
+This path inspects observations directly rather than simulating touch requests.
+
 The runtime consumes one async stream and awaits each output. Resource contexts
 close on completion, failure, and cancellation. Live sensor multiplexing, parallel
-inference, speech interruption, and device queue bounds are not implemented. Define
-those semantics when adding real adapters. Preserve acquisition/receipt/response
+inference, and speech interruption are not implemented. The webcam has one pending
+frame slot; other device queue policies remain undefined. Define those semantics
+when adding adapters. Preserve acquisition/receipt/response
 time distinctions; freshness must include inference and processing delay.
 
 For hardware, state assumptions and consult datasheets/official documentation
@@ -125,6 +155,8 @@ uv build
 
 Runtime dependencies are OpenAI and Pillow. Ruff, pytest, and an SDK-compatible
 mock HTTP transport are development tools; no CI workflow has been added.
+OpenCV is in the optional `webcam` extra. Run `uv run --locked --extra webcam pytest -q`
+to include synthetic OpenCV capture tests; base tests skip that optional module.
 Add focused tests for implemented behavior,
 using fake providers/devices and temporary storage so normal tests need no
 credentials, hardware, paid calls, or downloads. Async tests use `asyncio.run` and

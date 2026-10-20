@@ -5,8 +5,11 @@ one latest visual observation and responds to touch using a deterministic policy
 An image-file path now obtains a description through OpenAI behind a vision
 interface and feeds it into the same behavior. Provider HTTP handling is tested
 with mocked responses; a manual live API smoke test and a documented three-image
-check succeeded, while systematic evaluation remains outstanding. Persistent memory
-and hardware integration have not been implemented.
+check succeeded, while systematic evaluation remains outstanding. An optional
+webcam adapter has one-shot and continuous modes. A manual one-shot webcam smoke
+test succeeded; continuous mode has automated tests and a reported successful
+manual smoke test. Duration, device details, and timings were not recorded.
+Persistent memory, actuation, and multimodal sensor multiplexing are not implemented.
 
 ## Decisions made
 
@@ -66,6 +69,20 @@ The first vision contract is `VisionProvider.describe(ImageFrame)`, returning a
 without changing acquisition time. The OpenAI implementation lives in
 `providers/openai.py`; the image-file loader lives in `inputs/image.py`. See
 [the execution walkthrough](vision.md).
+`inputs/webcam.py` acquires laptop/USB camera frames and uses the same
+normalization helper and `ImageFrame` value as the file loader. OpenCV remains
+optional and confined to acquisition. A future Pi-specific adapter can replace
+that acquisition step; see [webcam execution and limits](webcam.md).
+
+For continuous observation, `WebcamStream` implements `ImageSource.read`. It
+drains capture on one device-owning worker and replaces a single pending raw frame.
+`VisualObservationLoop` handles one interpretation at a time, updates `WorldState`,
+and yields timestamped visual events. The CLI prints each event and then the loop
+waits its configured interval. Source/provider contexts belong to startup wiring.
+This is a dedicated visual inspection path; the existing touch-driven
+`AssistantRuntime` remains the separate simulated multimodal entry point. Neither
+command shares state with another process or stores a history on disk. Prior
+descriptions are not included in model prompts.
 
 Define the input/output the application actually needs rather than wrapping every
 API feature. Normalize results into shared application values;
@@ -136,8 +153,9 @@ devices is not implemented.
 
 The runner awaits each response before consuming the next event. It does not yet
 multiplex live sensors, schedule inference in parallel, interrupt speech, or enforce
-queue bounds/timeouts for actual devices. Those responsibilities must be designed
-when real adapters are introduced; this simulation does not establish control-loop
+general device queue bounds/timeouts. The continuous webcam adapter has its own
+latest-frame slot, but does not multiplex observations into this runner. Those
+responsibilities must be designed as more adapters are integrated; simulation does not establish control-loop
 timing or real-time performance. Output delivery is not retried automatically.
 
 Tests cover freshness boundaries, missing input, delayed/out-of-order acquisition,
@@ -148,8 +166,10 @@ The image-file command now provides an acquisition/perception path behind an
 application interface; its touch and output remain simulated. Unlike the default
 demo, it uses the real clock and includes inference time in freshness. The
 [first live check](experiments/2026-10-20-vision-smoke.md) records three public images.
-Next steps include choosing a camera, implementing acquisition, and validating
-representative scenes on that device. Add decision-model judgments when a behavior requires
+One-shot and continuous laptop/USB acquisition have successful manual smoke tests.
+Pacing and failure handling also have automated tests; next steps include sustained
+capture, timing measurements, and representative scenes on the tested device.
+Add decision-model judgments when a behavior requires
 semantic interpretation. Grow memory and scheduling from demonstrated needs.
 
 ## Legacy retirement

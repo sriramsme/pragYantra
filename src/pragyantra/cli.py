@@ -18,6 +18,7 @@ from pragyantra.application.models import (
     ContextResponse,
     ObservationEvent,
     TouchObservation,
+    VisualObservation,
     require_aware,
 )
 from pragyantra.application.runtime import AssistantRuntime
@@ -59,15 +60,40 @@ def _capture_time(value: str) -> datetime:
         ) from exc
 
 
+def _camera_index(value: str) -> int:
+    try:
+        index = int(value)
+        if index < 0:
+            raise ValueError
+        return index
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("Use a nonnegative webcam index") from exc
+
+
+def _positive_count(value: str) -> int:
+    try:
+        count = int(value)
+        if count <= 0:
+            raise ValueError
+        return count
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("Use a positive observation count") from exc
+
+
 async def _see(args: argparse.Namespace) -> tuple[ContextResponse, ...]:
     # Keep image libraries and model SDKs out of demo/help startup.
     from pragyantra.application.perception import perceive_image
     from pragyantra.inputs.image import load_image
     from pragyantra.providers.openai import DEFAULT_MODEL, openai_vision
 
-    frame = await asyncio.to_thread(
-        load_image, args.image, observed_at=args.captured_at
-    )
+    if args.webcam is not None:
+        from pragyantra.inputs.webcam import capture_webcam
+
+        frame = await asyncio.to_thread(capture_webcam, args.webcam)
+    else:
+        frame = await asyncio.to_thread(
+            load_image, args.image, observed_at=args.captured_at
+        )
     async with openai_vision(
         model=args.model or DEFAULT_MODEL,
         timeout=args.timeout.total_seconds(),
@@ -92,6 +118,46 @@ async def _see(args: argparse.Namespace) -> tuple[ContextResponse, ...]:
     runtime = AssistantRuntime(DescribeOnTouch(args.max_visual_age))
     await runtime.run(source, output)
     return output.responses
+
+
+async def _watch(args: argparse.Namespace) -> None:
+    from pragyantra.application.observation_loop import VisualObservationLoop
+    from pragyantra.inputs.webcam import WebcamStream
+    from pragyantra.providers.openai import DEFAULT_MODEL, openai_vision
+
+    observer = VisualObservationLoop(args.interval, count=args.count)
+    async with (
+        openai_vision(
+            model=args.model or DEFAULT_MODEL,
+            timeout=args.timeout.total_seconds(),
+            reasoning_effort=args.reasoning_effort,
+            image_detail=args.image_detail,
+        ) as provider,
+        WebcamStream(args.webcam) as source,
+    ):
+        async for event in observer.observations(source, provider):
+            visual = event.observation
+            assert isinstance(visual, VisualObservation)
+            age = (event.received_at - visual.observed_at).total_seconds()
+            if args.json:
+                print(
+                    json.dumps(
+                        {
+                            "kind": "visual_observation",
+                            "source": visual.source,
+                            "observed_at": visual.observed_at.isoformat(),
+                            "received_at": event.received_at.isoformat(),
+                            "visual_age_seconds": age,
+                            "description": visual.description,
+                            "provider": visual.provider,
+                            "model": visual.model,
+                            "image_detail": visual.image_detail,
+                        }
+                    ),
+                    flush=True,
+                )
+            else:
+                print(f"[age {age:.2f}s] {visual.description}", flush=True)
 
 
 def _response_record(response: ContextResponse) -> dict[str, object]:
@@ -126,7 +192,8 @@ def main() -> None:
         description="PragYantra: a modular foundation for an embodied assistant.",
         epilog=(
             "The demo uses simulated observations and records text responses. "
-            "The see command sends an image to OpenAI. "
+            "The see command sends a file or webcam image to OpenAI. "
+            "The watch command repeats webcam vision requests. "
             "The original prototype is archived in legacy/."
         ),
     )
@@ -137,32 +204,65 @@ def main() -> None:
     demo = commands.add_parser(
         "demo", help="Replay the simulated visual-context behavior"
     )
-    see = commands.add_parser("see", help="Describe a local image using OpenAI vision")
-    see.add_argument("image", type=Path, help="PNG, JPEG, or WebP file to send")
-    see.add_argument(
-        "--model",
-        default=os.getenv("PRAGYANTRA_VISION_MODEL"),
-        help="Override the default gpt-5.6-luna vision model",
+    see = commands.add_parser(
+        "see", help="Describe a file or one webcam frame using OpenAI vision"
     )
     see.add_argument(
-        "--image-detail",
-        choices=["low", "high", "auto", "original"],
-        default="low",
-        help="Provider image detail for the normalized upload (default: low)",
+        "image", nargs="?", type=Path, help="PNG, JPEG, or WebP file to send"
     )
     see.add_argument(
-        "--reasoning-effort",
-        choices=["none", "low", "medium", "high", "xhigh", "max"],
-        default="none",
-        help="Reasoning effort supported by the selected model (default: none)",
+        "--webcam",
+        type=_camera_index,
+        metavar="INDEX",
+        help="Capture and send one webcam frame instead of a file (usually index 0)",
     )
-    see.add_argument(
-        "--timeout",
+    watch = commands.add_parser(
+        "watch", help="Repeatedly describe webcam frames; sends images to OpenAI"
+    )
+    watch.add_argument(
+        "--webcam",
+        type=_camera_index,
+        default=0,
+        metavar="INDEX",
+        help="Webcam index (default: 0)",
+    )
+    watch.add_argument(
+        "--interval",
         type=_positive_duration,
-        default=timedelta(seconds=20),
+        default=timedelta(seconds=5),
         metavar="SECONDS",
-        help="Vision request deadline (default: 20 seconds)",
+        help="Wait after each completed result (default: 5 seconds)",
     )
+    watch.add_argument(
+        "--count",
+        type=_positive_count,
+        help="Stop after this many observations; otherwise run until Ctrl+C",
+    )
+    for command in (see, watch):
+        command.add_argument(
+            "--model",
+            default=os.getenv("PRAGYANTRA_VISION_MODEL"),
+            help="Override the default gpt-5.6-luna vision model",
+        )
+        command.add_argument(
+            "--image-detail",
+            choices=["low", "high", "auto", "original"],
+            default="low",
+            help="Provider image detail for the normalized upload (default: low)",
+        )
+        command.add_argument(
+            "--reasoning-effort",
+            choices=["none", "low", "medium", "high", "xhigh", "max"],
+            default="none",
+            help="Reasoning effort supported by the selected model (default: none)",
+        )
+        command.add_argument(
+            "--timeout",
+            type=_positive_duration,
+            default=timedelta(seconds=20),
+            metavar="SECONDS",
+            help="Vision request deadline, excluding acquisition (default: 20 seconds)",
+        )
     see.add_argument(
         "--captured-at",
         type=_capture_time,
@@ -176,14 +276,23 @@ def main() -> None:
             metavar="SECONDS",
             help="Maximum usable image age (default: 5 seconds)",
         )
+    for command in (demo, see, watch):
         command.add_argument(
-            "--json", action="store_true", help="Print response evidence as JSON lines"
+            "--json", action="store_true", help="Print structured output as JSON lines"
         )
     args = parser.parse_args()
+    if args.command == "see":
+        if (args.image is None) == (args.webcam is None):
+            parser.error("see requires either an image file or --webcam INDEX")
+        if args.webcam is not None and args.captured_at is not None:
+            parser.error("--captured-at applies only to image files")
     if args.command is None:
         parser.print_help()
         return
     try:
+        if args.command == "watch":
+            asyncio.run(_watch(args))
+            return
         responses = asyncio.run(
             _demo(args.max_visual_age) if args.command == "demo" else _see(args)
         )

@@ -4,12 +4,13 @@ PragYantra explores software for an embodied assistant: perception, contextual
 state, memory, decision-making, speech, and interfaces to physical devices.
 
 The project is being rebuilt from a 2024 Python prototype. **The new implementation
-has a tested simulation and an image-file vision path using OpenAI. Visual
-observations update current context, and touch events request a description with
-missing/stale handling. Camera hardware and speech synthesis are not connected
-yet; a manual live API smoke test passed, while systematic accuracy and latency
-evaluation remain outstanding.** The original code and
-README are preserved in [legacy/](legacy/README.md).
+has a tested simulation, image-file vision using OpenAI, and webcam input with
+one-shot and continuous modes. Visual observations update current context; touch
+events in the simulation request a description with missing/stale handling.
+Manual file-vision, one-shot webcam, and continuous observation smoke tests passed.
+Automated tests cover timing and lifecycle behavior; systematic accuracy/latency
+evaluation and speech synthesis remain outstanding.** The original code and README are
+preserved in [legacy/](legacy/README.md).
 
 ## Development
 
@@ -76,6 +77,32 @@ establish awareness of the current physical surroundings.
 The [first live smoke check](docs/experiments/2026-10-20-vision-smoke.md) records
 descriptions and timing for three public images, with reproduction details and
 limits on what those results establish.
+
+## Describe one webcam frame
+
+```bash
+uv run --locked --extra webcam --env-file .env pragyantra see --webcam 0 --json
+```
+
+The optional `webcam` extra adds OpenCV. `inputs/webcam.py` captures a single frame
+and releases the device before inference; it returns the same `ImageFrame` as file
+input. A future Pi camera adapter can supply that value without changing the
+application or provider. See [webcam setup and limits](docs/webcam.md). A manual
+webcam smoke test passed; device details and timing were not recorded.
+
+## Observe continuously
+
+```bash
+uv run --extra webcam --env-file .env pragyantra watch --interval 5 --count 3 --json
+```
+
+The camera stays open and retains only its latest pending frame. One inference
+runs at a time, each result prints immediately, and the loop waits five seconds
+after a result before selecting another frame. Omit `--count` to run until Ctrl+C;
+each interpreted frame incurs an API request. Current context retains the newest
+scene without accumulating a history. Prior descriptions are not fed into prompts.
+See the [continuous observation walkthrough](docs/webcam.md#continuous-observation)
+for lifecycle and timing.
 
 ## Repository layout
 
