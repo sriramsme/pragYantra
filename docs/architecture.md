@@ -4,8 +4,8 @@ Status: first simulated behavior implemented and tested. The replacement maintai
 one latest visual observation and responds to touch using a deterministic policy.
 An image-file path now obtains a description through OpenAI behind a vision
 interface and feeds it into the same behavior. Provider HTTP handling is tested
-with mocked responses; a manual live API smoke test was reported successful, while
-systematic accuracy and latency evaluation remain outstanding. Persistent memory
+with mocked responses; a manual live API smoke test and a documented three-image
+check succeeded, while systematic evaluation remains outstanding. Persistent memory
 and hardware integration have not been implemented.
 
 ## Decisions made
@@ -146,9 +146,10 @@ and cancellation. No accuracy, hardware, or hosted-service results are claimed.
 
 The image-file command now provides an acquisition/perception path behind an
 application interface; its touch and output remain simulated. Unlike the default
-demo, it uses the real clock and includes inference time in freshness. Next steps
-include live validation with a configured API key and representative images, then
-camera acquisition. Add decision-model judgments when a chosen behavior requires
+demo, it uses the real clock and includes inference time in freshness. The
+[first live check](experiments/2026-10-20-vision-smoke.md) records three public images.
+Next steps include choosing a camera, implementing acquisition, and validating
+representative scenes on that device. Add decision-model judgments when a behavior requires
 semantic interpretation. Grow memory and scheduling from demonstrated needs.
 
 ## Legacy retirement

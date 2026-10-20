@@ -92,9 +92,10 @@ loader still normalizes uploads to at most 1024 pixels on the longest edge.
 For files, the default timestamp is pipeline acquisition, not the photo's historical
 capture time; `--captured-at` accepts a known time. This path uses the real clock,
 preserves acquisition time through inference, and retains simulated touch/output.
-A manual live API smoke test was reported successful on October 20, 2026;
-systematic accuracy and latency evaluation remain outstanding. No Google Cloud
-setup is required by the current implementation.
+A manual live API smoke test and a three-image check succeeded on October 20,
+2026. `docs/experiments/2026-10-20-vision-smoke.md` records descriptions, sources,
+and timing; systematic accuracy and latency evaluation remain outstanding.
+No Google Cloud setup is required by the current implementation.
 
 The runtime consumes one async stream and awaits each output. Resource contexts
 close on completion, failure, and cancellation. Live sensor multiplexing, parallel

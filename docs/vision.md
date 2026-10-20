@@ -1,9 +1,9 @@
 # Image-file vision: one execution
 
-Status: implemented with mocked API tests. A manual live API smoke test was
-reported successful on October 20, 2026; accuracy and latency have not yet been
-evaluated systematically. This path reads an image file, not a live camera; the
-touch request and text output remain simulated.
+Status: implemented with mocked API tests and a successful manual live API smoke
+test. A [three-image check](experiments/2026-10-20-vision-smoke.md) records actual
+descriptions and timing; systematic evaluation remains outstanding. This path
+reads an image file, not a live camera; touch and text output remain simulated.
 
 ## Run it
 
@@ -85,9 +85,10 @@ but is not worded as current visual context. Change the policy explicitly with
 - At most 10 MiB compressed input and 16 megapixels decoded. Animated images and
   other formats are rejected before constructing a provider. Normalization bounds
   upload size and strips original metadata, but the visible image content is sent.
-- No live accuracy, cost, timing, edge deployment, or hardware claims. A model
-  description is an interpretation; provenance is recorded without inventing a
-  confidence value.
+- The small live check records descriptions and timing, without establishing
+  general accuracy, billed cost, timing guarantees, edge deployment, or hardware
+  capability. A description is an interpretation; provenance is recorded without
+  inventing a confidence value.
 
 As checked on October 20, 2026, published standard model rates were $0.20 per
 million input tokens and $1.20 per million output tokens. For a square 1024-pixel

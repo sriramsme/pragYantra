@@ -73,6 +73,9 @@ simulation or tests. The five-second freshness policy includes inference latency
 See [the vision walkthrough](docs/vision.md) for each execution step, timing
 semantics, provider settings, limits, and setup. Loading an old photo does not
 establish awareness of the current physical surroundings.
+The [first live smoke check](docs/experiments/2026-10-20-vision-smoke.md) records
+descriptions and timing for three public images, with reproduction details and
+limits on what those results establish.
 
 ## Repository layout
 
