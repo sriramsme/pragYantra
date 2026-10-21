@@ -19,32 +19,36 @@ hard real-time behavior is claimed. See [verification evidence](docs/legacy-reti
 Use **uv** for all Python work. Development uses Python 3.12.
 
 ```bash
-uv sync --locked
-uv run pragyantra --help
-uv run pragyantra demo --json
+uv tool install --editable '.[audio,webcam]' --python 3.12
+prag --help
+prag demo --json
 ```
 
 For hosted capabilities, copy `.env.example` to `.env` and fill `OPENAI_API_KEY`.
+`.env` in the current directory loads automatically; shell variables take
+precedence. Use `--env-file PATH` or `--no-env` to override this.
 Credentials and runtime data are ignored by Git. Setup and CLI help do not contact
-services, download model weights, or open devices.
+inference services, download model weights, or open devices. The installation
+provides both `prag` and `pragyantra`; see [CLI setup and configuration](docs/cli.md)
+for locked development commands and optional dependencies.
 
 ## Start with text
 
 ```bash
-uv run --env-file .env pragyantra chat
-uv run --env-file .env pragyantra chat --message 'Hello' --message 'What can you perceive?' --json
+prag chat
+prag chat --message 'Hello' --message 'What can you perceive?' --json
 ```
 
 Use `/help` for commands and `/quit` to exit. Local commands work without a key:
 
 ```bash
-uv run pragyantra chat --commands-only \
+prag chat --commands-only \
   --message '/calc sqrt(16) + 2**3' \
   --message '/remember The blue mug belongs to Alex' \
   --message '/recall mug' --json
 ```
 
-Conversation history is bounded and held in memory. Add `--memory data/notes.sqlite`
+Conversation history is bounded and held in memory. Add `--memory`
 to persist **explicit notes**; transcripts and full conversations are not saved.
 Add `--semantic-memory` to embed new notes and queries through OpenAI instead of
 keyword recall. See [assistant execution](docs/assistant.md) and [memory](docs/memory.md).
@@ -52,9 +56,9 @@ keyword recall. See [assistant execution](docs/assistant.md) and [memory](docs/m
 ## See
 
 ```bash
-uv run --env-file .env pragyantra see /path/to/image.png --json
-uv run --extra webcam --env-file .env pragyantra see --webcam 0 --json
-uv run --extra webcam --env-file .env pragyantra watch --interval 5 --count 3 --json
+prag see /path/to/image.png --json
+prag see --camera --json
+prag watch --interval 5 --count 3 --json
 ```
 
 File and webcam inputs share normalization and the `ImageFrame` boundary. Vision
@@ -65,7 +69,7 @@ acquisition-time gap. Quality improvement has not been established.
 To converse with background visual context:
 
 ```bash
-uv run --extra webcam --env-file .env pragyantra chat --webcam 0
+prag chat --camera
 ```
 
 The first turn waits for an initial visual result. Subsequent vision runs
@@ -78,18 +82,18 @@ requests. Selected frames are uploaded to OpenAI. See [vision](docs/vision.md),
 File-based audio needs no audio-device dependency:
 
 ```bash
-uv run --env-file .env pragyantra speak 'Hello from PragYantra.' --output data/hello.wav
-uv run --env-file .env pragyantra listen data/hello.wav --json
-uv run --env-file .env pragyantra chat --audio data/hello.wav --json
+prag speak 'Hello from PragYantra.' --output data/hello.wav
+prag listen data/hello.wav --json
+prag chat --audio data/hello.wav --json
 ```
 
-For local microphone/speaker access, install the optional `audio` extra and system
-PortAudio; see [audio setup and limits](docs/audio.md).
+The installation above includes audio support. Microphone/speaker access also
+requires system PortAudio; see [audio setup and limits](docs/audio.md).
 
 ```bash
-uv run --extra audio pragyantra devices
-uv run --extra audio --env-file .env pragyantra chat --voice
-uv run --extra audio --extra webcam --env-file .env pragyantra chat --voice --webcam 0
+prag devices
+prag chat --voice
+prag chat --voice --camera
 ```
 
 Speech is AI-generated. Voice turns are half duplex: the microphone closes before

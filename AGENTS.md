@@ -44,7 +44,11 @@ completed robot, model accuracy result or real-time hardware validation.
 - `outputs/`: audio playback/artifacts and simulated output.
 - `providers/`: OpenAI inference and SQLite persistence implementations.
 - `cli/`: startup composition, arguments, task/resource ownership. The launcher
-  remains `pragyantra.cli:main`; command-family modules keep wiring readable.
+  remains `pragyantra.cli:main` for both `prag` and `pragyantra`; command-family
+  modules keep wiring readable. `.env` loads from the current directory at command
+  execution, before model defaults: flags > shell > env file > defaults. Never
+  search ancestors or load credentials on import/help/version. `--env-file` and
+  `--no-env` work before/after commands. See `docs/cli.md`.
 - `tests/`: deterministic component, SDK contract, lifecycle and CLI coverage.
 - `docs/`: architecture, execution guides, history, retirement audit and experiments.
 - Root `LICENSE`: existing GNU GPL version 3; preserve licensing and attribution.
@@ -65,7 +69,10 @@ a PNG/JPEG/WebP file or captures one webcam frame, then explicitly uploads it to
 OpenAI. `watch` continuously interprets selected webcam frames. `chat` integrates
 text/audio input, optional background vision, scalar sensor events, bounded history,
 explicit notes and optional speech. `listen`, `speak`, `devices`, `memory` and `calc`
-provide focused entry points. See README and execution guides for flags.
+provide focused entry points. Bare `listen` selects microphone; bare `speak TEXT`
+selects playback. `--camera`/`--webcam` accept an optional index (default 0), and
+`--memory` an optional path (data/notes.sqlite); these capabilities remain opt in.
+See README and execution guides for flags.
 
 Keep these semantics unless a requirement explicitly changes them:
 

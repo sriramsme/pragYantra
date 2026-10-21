@@ -141,6 +141,9 @@ settings. Generative requests use `store=False`, no reasoning and bounded output
 vision inspection defaults to 20 s and assistant services to 30 s per request.
 SDK retries are disabled. Credentials come from environment variables/ignored `.env`.
 Current service contracts follow official documentation linked from execution guides.
+`cli/environment.py` scopes automatic dotenv loading to the CLI invocation before
+model defaults are parsed; shell variables win. `cli/parser.py` provides consistent
+help/global options. See [CLI usage](cli.md) for the `prag` alias and device defaults.
 
 Explicit `/commands` implement known rules/calculations and note operations.
 Conversation has no tool/actuator access; generated text is never executed.

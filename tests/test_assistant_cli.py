@@ -194,8 +194,8 @@ def test_integrated_camera_audio_reply_and_speech_close_all_contexts(
         ["chat", "--commands-only", "--voice"],
         ["chat", "--count", "2"],
         ["chat", "--message", "hi", "--events"],
-        ["listen"],
-        ["speak", "hello"],
+        ["listen", "utterance.wav", "--microphone"],
+        ["speak"],
     ],
 )
 def test_incompatible_modes_fail_before_devices_or_provider_start(

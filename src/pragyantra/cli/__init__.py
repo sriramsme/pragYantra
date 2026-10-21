@@ -9,6 +9,7 @@ import json
 import math
 import os
 import sqlite3
+import sys
 from datetime import datetime, timedelta
 from importlib.metadata import version
 from pathlib import Path
@@ -104,22 +105,38 @@ def _response_record(response: ContextResponse) -> dict[str, object]:
 
 
 def main() -> None:
-    """Initialize providers only for commands that explicitly request them."""
-    parser = argparse.ArgumentParser(
-        prog="pragyantra",
-        description="PragYantra: a modular foundation for an embodied assistant.",
+    """Load invocation configuration before building defaults or opening resources."""
+    from pragyantra.cli.environment import cli_environment
+
+    name = Path(sys.argv[0]).stem
+    prog = name if name in ("prag", "pragyantra") else "pragyantra"
+    with cli_environment(sys.argv[1:], prog=prog) as argv:
+        _run(argv, prog=prog)
+
+
+def _run(argv: list[str], *, prog: str) -> None:
+    from pragyantra.cli.parser import CLIParser
+
+    parser = CLIParser(
+        prog=prog,
+        description="PragYantra — see, hear, converse and remember.",
         epilog=(
-            "The demo uses simulated observations and records text responses. "
-            "The see command sends a file or webcam image to OpenAI. "
-            "The watch command repeats webcam vision requests. "
-            "Chat supports text, audio, explicit memories "
-            "and optional background vision."
+            f"Examples:\n"
+            f"  {prog} chat                         Start a text conversation\n"
+            f"  {prog} chat --voice --camera         Talk with visual context\n"
+            f"  {prog} see photo.jpg                 Describe an image\n"
+            f"  {prog} listen                        Transcribe your microphone\n"
+            f"  {prog} speak 'Hello'                 Speak some text\n\n"
+            "Reads .env from the current directory. Shell variables take precedence.\n"
+            "Camera/audio uploads and hosted inference run only when requested."
         ),
     )
     parser.add_argument(
-        "--version", action="version", version=f"%(prog)s {version('pragyantra')}"
+        "-V", "--version", action="version", version=f"%(prog)s {version('pragyantra')}"
     )
-    commands = parser.add_subparsers(dest="command")
+    commands = parser.add_subparsers(
+        dest="command", title="Commands", metavar="COMMAND"
+    )
     demo = commands.add_parser(
         "demo", help="Replay the simulated visual-context behavior"
     )
@@ -130,20 +147,28 @@ def main() -> None:
         "image", nargs="?", type=Path, help="PNG, JPEG, or WebP file to send"
     )
     see.add_argument(
+        "--camera",
         "--webcam",
+        dest="webcam",
+        nargs="?",
+        const=0,
         type=_camera_index,
         metavar="INDEX",
-        help="Capture and send one webcam frame instead of a file (usually index 0)",
+        help="Capture one camera frame (default index: 0)",
     )
     watch = commands.add_parser(
         "watch", help="Repeatedly describe webcam frames; sends images to OpenAI"
     )
     watch.add_argument(
+        "--camera",
         "--webcam",
+        dest="webcam",
+        nargs="?",
+        const=0,
         type=_camera_index,
         default=0,
         metavar="INDEX",
-        help="Webcam index (default: 0)",
+        help="Camera index (default: 0)",
     )
     watch.add_argument(
         "--interval",
@@ -153,6 +178,7 @@ def main() -> None:
         help="Wait after each completed result (default: 5 seconds)",
     )
     watch.add_argument(
+        "-n",
         "--count",
         type=_positive_count,
         help="Stop after this many observations; otherwise run until Ctrl+C",
@@ -211,7 +237,10 @@ def main() -> None:
         )
     for command in (demo, see, watch):
         command.add_argument(
-            "--json", action="store_true", help="Print structured output as JSON lines"
+            "-j",
+            "--json",
+            action="store_true",
+            help="Print structured output as JSON lines",
         )
     from pragyantra.cli.configure import add_commands, validate
 
@@ -222,7 +251,7 @@ def main() -> None:
         timestamp=_capture_time,
         camera_index=_camera_index,
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     validate(args, parser)
     if args.command == "see":
         if (args.image is None) == (args.webcam is None):

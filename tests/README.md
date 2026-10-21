@@ -64,3 +64,9 @@ without collecting historical code.
 A synthetic paid-service smoke check is documented in
 [the experiment log](../docs/experiments/2026-10-20-assistant-smoke.md); it is not
 an automatically executed test or evidence of physical audio-device performance.
+
+- `test_cli_environment.py`: installed executable aliases, dotenv scope/precedence,
+  alternate/no env files, lightweight help, camera/memory defaults and audio mode
+  selection with fake handlers. `conftest.py` blocks real sockets and audio devices,
+  disables project dotenv loading and removes the ambient API key for normal tests;
+  configuration tests explicitly enable only temporary env fixtures.

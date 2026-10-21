@@ -5,12 +5,14 @@ File audio and hosted services have automated tests and a
 Actual microphone/speaker operation has not been manually validated in this rebuild.
 The endpoint detector is a configurable energy heuristic, not neural speech recognition.
 
+See [CLI installation](cli.md) for the `prag` command and automatic `.env` loading.
+
 ## Without devices
 
 ```bash
-uv run --env-file .env pragyantra speak 'Hello from PragYantra.' --output data/hello.wav
-uv run --env-file .env pragyantra listen data/hello.wav --json
-uv run --env-file .env pragyantra chat --audio data/hello.wav --json
+prag speak 'Hello from PragYantra.' --output data/hello.wav
+prag listen data/hello.wav --json
+prag chat --audio data/hello.wav --json
 ```
 
 Speech is AI-generated. `speak --output` requires a new path and never overwrites
@@ -28,10 +30,10 @@ time. Recordings are not committed or retained automatically.
 Install system PortAudio using your OS package manager, then:
 
 ```bash
-uv sync --locked --extra audio
-uv run --extra audio pragyantra devices
-uv run --extra audio --env-file .env pragyantra listen --microphone --json
-uv run --extra audio --env-file .env pragyantra chat --voice
+# After the one-time tool installation in the CLI guide:
+prag devices
+prag listen --json
+prag chat --voice
 ```
 
 `devices` enumerates available devices without recording or playing anything.

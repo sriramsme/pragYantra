@@ -8,10 +8,12 @@ requires-python = ">=3.12"
 dependencies = [
     "openai>=3.35.1",
     "pillow>=13.0.0",
+    "python-dotenv>=1.2.4",
 ]
 
 [project.scripts]
 pragyantra = "pragyantra.cli:main"
+prag = "pragyantra.cli:main"
 
 [project.optional-dependencies]
 webcam = [

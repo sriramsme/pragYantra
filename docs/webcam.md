@@ -11,8 +11,8 @@ were not recorded; this does not establish sustained reliability or timing bound
 ## Run it
 
 ```bash
-uv sync --locked --extra webcam
-uv run --locked --extra webcam --env-file .env pragyantra see --webcam 0 --json
+# After the one-time installation in the CLI guide:
+prag see --camera --json
 ```
 
 This opens camera index 0, reads one frame, releases the camera, and sends the
@@ -21,13 +21,14 @@ and output options as file input. It neither saves a photograph nor displays a
 preview. Touch and text output remain simulated. Each invocation makes at most
 one vision request. Continuous observation is a separate explicit `watch` command.
 
-Use another nonnegative index if needed. An image path and `--webcam` are mutually
+Use another nonnegative index if needed. An image path and `--camera`/`--webcam` are mutually
 exclusive. `--captured-at` applies only to image files.
 
 OpenCV is an optional dependency in the `webcam` extra. File vision and the demo
 do not need it. The headless package provides capture and conversion without GUI
 dependencies; see the [package documentation](https://pypi.org/project/opencv-python-headless/).
-Use the `--extra webcam` flag for webcam commands so uv includes that dependency.
+The installed tool includes this extra when set up with `.[audio,webcam]`; when
+using `uv run`, include `--extra webcam`. See [CLI installation](cli.md).
 
 ## Follow the boundary
 
@@ -53,8 +54,8 @@ same `ImageFrame`. No Pi-specific adapter or deployment claim is included yet.
 ## Continuous observation
 
 ```bash
-uv run --extra webcam --env-file .env pragyantra watch \
-  --webcam 0 --interval 5 --count 3 --json
+prag watch \
+  --camera --interval 5 --count 3 --json
 ```
 
 This opens one camera and one provider client for the whole session. It interprets
@@ -151,7 +152,7 @@ establish that a particular Raspberry Pi camera or OS is supported.
 
 ## Conversation with a camera
 
-`chat --webcam 0` uses the same stream and observation loop, sharing its
+`chat --camera` uses the same stream and observation loop, sharing its
 `WorldState` with the conversation session. The first turn waits for one visual
 result; background interpretation then continues while turns/output run. This
 mode does not print each visual result or enable prior-description prompts. Its

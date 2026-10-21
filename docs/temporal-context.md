@@ -7,7 +7,7 @@ description remains the default.
 ## Run it
 
 ```bash
-uv run --extra webcam --env-file .env pragyantra watch \
+prag watch \
   --temporal-context --context-max-gap 30 --interval 5 --count 3 --json
 ```
 

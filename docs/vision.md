@@ -9,10 +9,10 @@ acquisition path. Touch and text output remain simulated.
 ## Run it
 
 ```bash
-uv sync --locked
+# Install prag as described in the CLI guide.
 cp .env.example .env
 # Fill OPENAI_API_KEY in .env using your editor.
-uv run --env-file .env pragyantra see /path/to/image.png --json
+prag see /path/to/image.png --json
 ```
 
 The command sends a normalized copy of the selected image to OpenAI. You can also
@@ -58,7 +58,7 @@ are not silently treated as reliable capture times.
 If the actual capture time is known, supply it explicitly:
 
 ```bash
-uv run --env-file .env pragyantra see image.jpg \
+prag see image.jpg \
   --captured-at 2026-10-20T10:00:00-05:00 --json
 ```
 

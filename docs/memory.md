@@ -15,12 +15,12 @@ not proof that a statement is true or a physical observation is still current.
 ## Keyword recall: default, local
 
 ```bash
-uv run pragyantra memory --database data/notes.sqlite add 'The blue mug belongs to Alex'
-uv run pragyantra memory --database data/notes.sqlite search mug
-uv run pragyantra memory --database data/notes.sqlite list --limit 10
-uv run pragyantra memory --database data/notes.sqlite search mug --since 2026-10-20T00:00:00Z
-uv run pragyantra memory --database data/notes.sqlite forget 1
-uv run --env-file .env pragyantra chat --memory data/notes.sqlite
+prag memory --database data/notes.sqlite add 'The blue mug belongs to Alex'
+prag memory --database data/notes.sqlite search mug
+prag memory --database data/notes.sqlite list --limit 10
+prag memory --database data/notes.sqlite search mug --since 2026-10-20T00:00:00Z
+prag memory --database data/notes.sqlite forget 1
+prag chat --memory data/notes.sqlite
 ```
 
 Standalone `memory` operations never call a hosted API. In chat, `/remember`,
@@ -45,7 +45,7 @@ imported**; reconstruct reviewed notes through explicit commands instead.
 ## Semantic recall: opt in
 
 ```bash
-uv run --env-file .env pragyantra chat --memory data/notes.sqlite --semantic-memory \
+prag chat --memory data/notes.sqlite --semantic-memory \
   --message '/remember The blue mug belongs to Alex' \
   --message 'Who owns the blue drinking vessel?' --json
 ```

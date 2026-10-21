@@ -7,14 +7,26 @@ from pathlib import Path
 
 def add_commands(commands, *, duration, count, timestamp, camera_index):
     chat = commands.add_parser(
-        "chat", help="Converse using text, audio, current vision and explicit memories"
+        "chat",
+        usage="%(prog)s [OPTIONS]",
+        help="Converse using text, audio, current vision and explicit memories",
     )
-    sources = chat.add_mutually_exclusive_group()
+    inputs = chat.add_argument_group("Input")
+    context = chat.add_argument_group("Context and memory")
+    session = chat.add_argument_group("Session")
+    chat_models = chat.add_argument_group("Models")
+    chat_output = chat.add_argument_group("Output")
+    sources = inputs.add_mutually_exclusive_group()
     sources.add_argument(
-        "--message", action="append", help="Text turn; repeat for a finite conversation"
+        "-m",
+        "--message",
+        action="append",
+        metavar="TEXT",
+        help="Text turn; repeat for a finite conversation",
     )
     sources.add_argument(
         "--audio",
+        metavar="WAV",
         type=Path,
         action="append",
         help="WAV turn; repeat for a finite conversation",
@@ -24,117 +36,163 @@ def add_commands(commands, *, duration, count, timestamp, camera_index):
         action="store_true",
         help="Listen and speak in half-duplex voice turns",
     )
-    chat.add_argument(
+    inputs.add_argument(
         "--events",
         action="store_true",
         help="Read version-1 JSONL text/sensor/touch events from stdin",
     )
-    chat.add_argument(
+    session.add_argument(
         "--commands-only",
         action="store_true",
         help="Local /commands only; no hosted providers or credentials",
     )
-    chat.add_argument(
-        "--memory", type=Path, help="Persist explicit notes in this SQLite file"
+    context.add_argument(
+        "--memory",
+        type=Path,
+        nargs="?",
+        const=Path("data/notes.sqlite"),
+        metavar="PATH",
+        help="Persist notes (default path: data/notes.sqlite)",
     )
-    chat.add_argument(
+    context.add_argument(
         "--semantic-memory",
         action="store_true",
         help="Use hosted embeddings for new explicit notes and recall",
     )
-    chat.add_argument(
+    chat_models.add_argument(
         "--embedding-model",
         default=os.getenv("PRAGYANTRA_EMBEDDING_MODEL", "text-embedding-3-small"),
+        help="Embedding model used by --semantic-memory",
     )
-    chat.add_argument(
+    context.add_argument(
+        "--camera",
         "--webcam",
+        dest="webcam",
+        nargs="?",
+        const=0,
         type=camera_index,
-        help="Enable background visual context from this camera",
+        metavar="INDEX",
+        help="Enable background vision (default camera: 0)",
     )
-    chat.add_argument(
+    context.add_argument(
         "--vision-interval",
+        help="Delay after a visual result in seconds (default: 5)",
         type=duration,
         default=timedelta(seconds=5),
         metavar="SECONDS",
     )
-    chat.add_argument(
+    context.add_argument(
         "--context-max-age",
+        help="Sensory freshness limit in seconds (default: 5)",
         type=duration,
         default=timedelta(seconds=5),
         metavar="SECONDS",
     )
-    chat.add_argument(
-        "--model", default=os.getenv("PRAGYANTRA_CHAT_MODEL", "gpt-5.6-luna")
+    chat_models.add_argument(
+        "--model",
+        default=os.getenv("PRAGYANTRA_CHAT_MODEL", "gpt-5.6-luna"),
+        help="Conversation model; also set by PRAGYANTRA_CHAT_MODEL",
     )
-    chat.add_argument("--vision-model", default=os.getenv("PRAGYANTRA_VISION_MODEL"))
-    chat.add_argument("--count", type=count, help="Stop after this many voice turns")
-    chat.add_argument(
+    chat_models.add_argument(
+        "--vision-model", default=os.getenv("PRAGYANTRA_VISION_MODEL")
+    )
+    session.add_argument(
+        "-n", "--count", type=count, help="Stop after this many voice turns"
+    )
+    chat_output.add_argument(
         "--speak", action="store_true", help="Speak replies using AI-generated speech"
     )
     listen = commands.add_parser(
         "listen", help="Transcribe one WAV file or microphone utterance"
     )
-    listen.add_argument("file", type=Path, nargs="?")
-    listen.add_argument("--microphone", action="store_true")
+    listen.add_argument(
+        "file",
+        type=Path,
+        nargs="?",
+        metavar="WAV",
+        help="WAV file; otherwise listen to the microphone",
+    )
+    listen.add_argument(
+        "--microphone",
+        action="store_true",
+        help="Listen to the microphone (default when no WAV is given)",
+    )
     speak = commands.add_parser(
         "speak", help="Generate AI speech as WAV and/or play it"
     )
     speak.add_argument("text")
     speak.add_argument(
-        "--output", type=Path, help="New WAV file; existing files are never overwritten"
+        "-o",
+        "--output",
+        type=Path,
+        metavar="WAV",
+        help="New WAV file; existing files are never overwritten",
     )
     speak.add_argument(
         "--play",
         action="store_true",
-        help="Play AI-generated speech through an audio device",
+        help="Play speech (default when no output file is given)",
     )
+    models = {
+        chat: chat_models,
+        listen: listen.add_argument_group("Models"),
+        speak: speak.add_argument_group("Models"),
+    }
+    outputs = {
+        chat: chat_output,
+        listen: listen.add_argument_group("Output"),
+        speak: speak.add_argument_group("Audio output"),
+    }
     for command in (chat, listen, speak):
-        command.add_argument(
+        models[command].add_argument(
             "--timeout", type=duration, default=timedelta(seconds=30), metavar="SECONDS"
         )
     for command in (chat, listen):
-        command.add_argument(
+        audio = command.add_argument_group("Audio input")
+        models[command].add_argument(
             "--transcription-model",
             default=os.getenv(
                 "PRAGYANTRA_TRANSCRIPTION_MODEL", "gpt-4o-mini-transcribe"
             ),
         )
-        command.add_argument("--input-device", type=camera_index)
-        command.add_argument(
+        audio.add_argument("--input-device", type=camera_index)
+        audio.add_argument(
             "--sample-rate",
             type=int,
             choices=[8000, 16000, 24000, 44100, 48000],
             default=16000,
         )
-        command.add_argument("--energy-threshold", type=float, default=0.015)
-        command.add_argument(
+        audio.add_argument("--energy-threshold", type=float, default=0.015)
+        audio.add_argument(
             "--listen-timeout",
             type=duration,
             default=timedelta(seconds=30),
             metavar="SECONDS",
         )
-        command.add_argument(
+        audio.add_argument(
             "--utterance-limit",
             type=duration,
             default=timedelta(seconds=15),
             metavar="SECONDS",
         )
-        command.add_argument(
+        audio.add_argument(
             "--silence-duration",
             type=duration,
             default=timedelta(seconds=0.7),
             metavar="SECONDS",
         )
-        command.add_argument("--json", action="store_true")
+        outputs[command].add_argument(
+            "-j", "--json", action="store_true", help="Print machine-readable JSON"
+        )
     for command in (chat, speak):
-        command.add_argument(
+        models[command].add_argument(
             "--speech-model",
             default=os.getenv("PRAGYANTRA_SPEECH_MODEL", "gpt-4o-mini-tts"),
         )
-        command.add_argument(
+        models[command].add_argument(
             "--voice-name", default=os.getenv("PRAGYANTRA_VOICE", "coral")
         )
-        command.add_argument("--output-device", type=camera_index)
+        outputs[command].add_argument("--output-device", type=camera_index)
     commands.add_parser(
         "devices", help="List audio devices without recording or playback"
     )
@@ -161,10 +219,12 @@ def add_commands(commands, *, duration, count, timestamp, camera_index):
 
 
 def validate(args, parser):
-    if args.command == "listen" and (args.file is not None) == args.microphone:
-        parser.error("listen requires either a WAV file or --microphone")
-    if args.command == "speak" and not (args.output or args.play):
-        parser.error("speak requires --output PATH and/or --play")
+    if args.command == "listen":
+        if args.file is not None and args.microphone:
+            parser.error("Choose a WAV file or --microphone, not both")
+        args.microphone = args.file is None
+    if args.command == "speak" and args.output is None:
+        args.play = True
     if args.command == "chat":
         if args.events and (args.message or args.audio or args.voice):
             parser.error(

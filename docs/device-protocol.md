@@ -6,7 +6,7 @@ can target. Stdin is a local trusted-producer interface, not an authenticated
 network service or a hard real-time bus.
 
 ```bash
-uv run pragyantra chat --commands-only --events --json
+prag chat --commands-only --events --json
 ```
 
 Send one JSON object per UTF-8 line (timestamps below are examples; use actual
@@ -22,7 +22,7 @@ A sensor event updates `WorldState` without model inference. A text event runs a
 conversation turn or `/command`. A touch requests the latest visual context using
 the deterministic missing/current/stale behavior. To combine these records with
 background vision and hosted conversation, omit `--commands-only` and add
-`--webcam 0` with the webcam extra and credentials.
+`--camera` with the webcam extra and credentials.
 
 ## Schema and validation
 

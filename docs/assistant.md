@@ -7,11 +7,11 @@ commands. Processes do not share world state.
 ## Choose inputs
 
 ```bash
-uv run --env-file .env pragyantra chat
-uv run --env-file .env pragyantra chat --message 'Hello' --message 'And now?' --json
-uv run --env-file .env pragyantra chat --audio data/utterance.wav --json
-uv run --extra audio --env-file .env pragyantra chat --voice --count 2
-uv run --extra webcam --env-file .env pragyantra chat --webcam 0
+prag chat
+prag chat --message 'Hello' --message 'And now?' --json
+prag chat --audio data/utterance.wav --json
+prag chat --voice --count 2
+prag chat --camera
 ```
 
 Text defaults to UTF-8 stdin. `--message` and `--audio` can repeat for finite
@@ -20,7 +20,7 @@ structured stdin records instead; see [device events](device-protocol.md).
 Linux terminal/pipe reads are cancellable without a permanently blocked `input()`
 thread. Lines are limited to 16 KiB; user messages to 4,000 characters.
 
-`--webcam` adds an independent vision task and waits for its first result before
+`--camera` (alias `--webcam`) adds an independent vision task and waits for its first result before
 handling the first user turn. The camera continues capturing during conversation;
 vision inference stays serial. `--vision-interval` is a delay after a result,
 default five seconds, not a guaranteed rate. Chat uses independent descriptions;
