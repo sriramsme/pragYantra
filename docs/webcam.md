@@ -31,7 +31,7 @@ Use the `--extra webcam` flag for webcam commands so uv includes that dependency
 
 ## Follow the boundary
 
-1. `cli.py` chooses file or webcam acquisition. It runs the blocking acquisition
+1. `cli/vision.py:see` chooses file or webcam acquisition. It runs the blocking acquisition
    function in a worker thread.
 2. `inputs/webcam.py:capture_webcam` uses a private blocking `_Webcam` session.
    It imports OpenCV only when called, opens the
@@ -74,7 +74,7 @@ The execution path has three responsibilities:
    JPEG encoded. Acquisition time survives inference; the returned observation
    records receipt time and updates the existing `WorldState`. The application
    knows neither OpenCV nor the hosted SDK.
-3. **Inspection output:** `cli.py:_watch` prints each event immediately and flushes
+3. **Inspection output:** `cli/vision.py:watch` prints each event immediately and flushes
    stdout. JSON includes the description, source, acquisition/receipt timestamps,
    age, provider, model, and detail. Text mode shows age alongside the description.
    Output does not accumulate in a recording list. This is observation inspection;
@@ -93,12 +93,12 @@ without asserting that they describe the present instant; it does not apply the
 touch behavior's five-second freshness policy. `WorldState` retains the newest
 acquired scene. Context is in memory and disappears when the process ends.
 
-Previous descriptions are **not** sent back to the model. Temporal interpretation
-is a candidate experiment: supply at most one previous description, mark it as an
-earlier interpretation, and calculate the gap from acquisition times. Compare that
-against this independent-frame baseline on the same recorded sequence before
-making it a default. Text summaries alone do not establish object identity or
-motion, and feeding erroneous summaries back can propagate mistakes.
+Previous descriptions are not sent in the default mode. `--temporal-context`
+enables an experiment using one earlier description and its acquisition-time gap,
+with a configurable maximum gap (default 30 seconds). JSON records the exact
+context supplied. See the [temporal-context walkthrough](temporal-context.md) for
+selection rules, prompt behavior, and how to compare modes. Text summaries alone
+do not establish identity or motion, and earlier mistakes can propagate.
 
 Provider failure stops the command without retrying. A camera error is delivered
 on the next frame read; a request already interpreting an earlier valid frame can
@@ -148,3 +148,13 @@ Basic physical capture was reported successful in the manual smoke test. Device
 disconnect behavior, exposure settling, repeated-run reliability, and driver
 shutdown timing still require evaluation. OpenCV wheel availability does not
 establish that a particular Raspberry Pi camera or OS is supported.
+
+## Conversation with a camera
+
+`chat --webcam 0` uses the same stream and observation loop, sharing its
+`WorldState` with the conversation session. The first turn waits for one visual
+result; background interpretation then continues while turns/output run. This
+mode does not print each visual result or enable prior-description prompts. Its
+provider timeout defaults to 30 seconds, separate from standalone `watch`'s
+20-second default. See [assistant execution](assistant.md) for freshness at prompt
+time and task/resource cleanup. Use the webcam extra and credentials as above.

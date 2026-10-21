@@ -21,7 +21,7 @@ required for `demo` or tests. A missing key produces an actionable error.
 
 ## Follow the data
 
-1. `cli.py` selects the `see` command and calls `_see`. It loads the heavier image
+1. `cli/__init__.py` selects `see` and calls `cli/vision.py:see`. It loads the heavier image
    and SDK modules only for this command.
 2. `inputs/image.py:load_image` reads PNG/JPEG/WebP bytes, validates the decoded
    image, applies orientation, and reduces the longest edge to at most 1024 pixels.

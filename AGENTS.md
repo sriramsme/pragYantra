@@ -1,173 +1,140 @@
 # Working on PragYantra
 
-## Project context
+## Project context and scope
 
-PragYantra is being rebuilt from a 2024 multimodal assistant prototype. The aim is
-software for an embodied assistant that perceives, maintains context, decides, and
-interacts with physical devices. The original prototype did not produce completed
-hardware integration or a functioning humanoid robot.
+PragYantra modernizes a 2024 multimodal assistant prototype into software for an
+embodied assistant: perceiving, maintaining context, conversing, remembering and
+interacting through explicit interfaces. The original prototype did not complete
+hardware integration or build a functioning humanoid robot. Its source/audit remain
+in Git; see `docs/history.md` and `docs/legacy-retirement.md`.
 
-No hardware target, robot form factor, controller, or transport has been selected.
-Raspberry Pi deployment is a candidate, not a tested capability. Hardware
-integration should follow concrete requirements and independently tested interfaces.
+No hardware target, robot form factor, controller, electrical interface or
+transport has been selected. Raspberry Pi is a candidate, not a tested deployment.
+Keep deadline-sensitive control and device limits local to the eventual controller.
+Consult datasheets/official documentation before implementing physical interfaces.
+Do not add C++/firmware scaffolding without a concrete responsibility.
 
-Favor working milestones and reproducible evidence. Document design decisions,
-tradeoffs, experiments, and limitations. Distinguish implemented capabilities from
-proposed work; do not invent results or performance measurements.
+Favor incremental working milestones, measured evidence, explicit tradeoffs and
+honest limitations. Never present plans, fake-device tests or smoke checks as a
+completed robot, model accuracy result or real-time hardware validation.
 
-## Chosen direction
+## Environment and chosen direction
 
-- Python for the initial application; C++ for firmware/native components when a
-  requirement justifies them, interoperating with vendor C APIs as appropriate.
-  Do not introduce firmware or a C++ tree merely to include the language.
-- **Always use `uv` for Python**: interpreter/environment management, dependencies,
-  scripts, tools, and tests. Use `uv add`, `uv sync`, and `uv run`; never standalone
-  pip or global Python installs. Keep `pyproject.toml` and `uv.lock` in sync.
-- The initial development interpreter is Python 3.12 (`.python-version`). Validate
-  provider dependencies and ARM support as integrations are added; do not assume
-  the host environment establishes hardware compatibility.
-- Hosted APIs are acceptable for vision and other model capabilities. Local models
-  remain an option. Offline-only operation is not a universal requirement.
-- Decision models such as Jev and OpenAI Decisions are candidates for bounded
-  semantic judgments. Keep known rules/calculations in code, evaluate judgments
-  on representative inputs, and use generative models when the behavior needs them.
-  OpenAI Responses vision is integrated behind `VisionProvider`; decision-model
-  providers are not integrated yet.
+- **Always use uv for Python**: interpreters, environments, dependencies, scripts,
+  tools and tests. Use `uv add`, `uv sync`, `uv run`; never standalone pip/global
+  Python installs. Keep `pyproject.toml` and `uv.lock` in sync.
+- Python 3.12 is the development interpreter (`.python-version`); C++ is the
+  companion language for justified firmware/native work, using vendor C APIs
+  where appropriate. Host tests do not establish ARM dependency support.
+- Hosted APIs are acceptable; local models remain an option, not an offline-only
+  requirement. Current OpenAI defaults are user-selected `gpt-5.6-luna` for
+  vision/conversation, `gpt-4o-mini-transcribe`, `gpt-4o-mini-tts`/`coral`, and
+  optional `text-embedding-3-small`. Do not silently replace requested models.
+- Consult live official provider documentation for version-dependent integrations.
+  SDKs/authentication/deadlines/response parsing belong in providers.
+- Jev/OpenAI Decisions remain candidates, not integrated providers. Keep known
+  rules/calculations in code and evaluate any semantic judgment on representative
+  inputs. Generative conversation is appropriate when behavior requires it.
 
-## Current repository
+## Repository and dependency rules
 
-- `src/pragyantra/`: replacement package with a simulation, image-file vision,
-  and optional one-shot/continuous laptop/USB webcam input.
-  `inputs/` acquires observations; `application/` owns shared values/interfaces,
-  world state, behaviors, and lifecycle; `outputs/` executes speech/device requests;
-  `providers/` wraps third-party APIs and external model/service implementations.
-  Root `cli.py` wires components and exposes the launcher.
-- `docs/architecture.md`: responsibilities, dependency rules, deployment boundaries,
-  and current behavior/limitations. Keep it aligned with the implementation.
-- `docs/vision.md`: step-by-step image execution, configuration, and timing limits.
-- `docs/webcam.md`: optional camera setup, observation loop, and capture limits.
-- `tests/`: behavior, timing, lifecycle, image validation, mocked SDK, and CLI tests.
-- `legacy/`: original application, requirements, scripts, README, notebook, and
-  architecture image. It is reference material, excluded from the new package and
-  linting. Its local `AGENTS.md` contains the historical audit.
-- Root `README.md`: current setup and implementation status. Root `LICENSE`:
-  existing GNU GPL version 3 license; preserve licensing and attribution.
+- `src/pragyantra/application/`: shared typed values/protocols, state, perception,
+  conversation, memory policies, deterministic actions, runtime.
+- `inputs/`: acquisition, normalization, endpointing and device-event parsing.
+- `outputs/`: audio playback/artifacts and simulated output.
+- `providers/`: OpenAI inference and SQLite persistence implementations.
+- `cli/`: startup composition, arguments, task/resource ownership. The launcher
+  remains `pragyantra.cli:main`; command-family modules keep wiring readable.
+- `tests/`: deterministic component, SDK contract, lifecycle and CLI coverage.
+- `docs/`: architecture, execution guides, history, retirement audit and experiments.
+- Root `LICENSE`: existing GNU GPL version 3; preserve licensing and attribution.
 
-## Architecture rules
+Application code must not import concrete inputs/outputs/providers, SDKs, hardware
+libraries or historical code. Inputs/outputs/providers depend on application
+values/interfaces; inputs and outputs receive provider capabilities by protocol.
+Only startup wiring imports all four packages. Keep small protocols and dataclasses
+where behaviors need them, not a universal registry/plugin/service framework.
+Imports must not open devices, load weights, start threads or call APIs. Manage
+resources explicitly and separate acquisition from perception.
 
-Keep shared values and capability interfaces inside application modules as needed.
-Inputs, outputs, and providers depend on those values/interfaces. Application code
-must not import concrete inputs, outputs, providers, model SDKs, hardware libraries,
-or the legacy tree. Root `cli.py` may import all four packages to construct them.
-Inputs/outputs receive provider capabilities through interfaces rather than
-importing concrete providers. This is an ongoing system with asynchronous inputs
-and persistent world state, not a mandatory single synchronous pipeline.
+## Implemented behavior and constraints
 
-Use small protocols and typed values as behaviors need them. Keep API clients,
-authentication, SDK objects, timeouts, and response parsing in providers; keep
-device setup in inputs/outputs and supply configuration through startup wiring.
-Separate sensor acquisition from perception. Imports must not open devices, load
-weights, start threads, or call APIs. Manage lifecycle explicitly.
+`demo` uses a logical clock, simulated visual/touch observations and recorded text.
+Touch requests current visual context with missing/stale handling. `see` normalizes
+a PNG/JPEG/WebP file or captures one webcam frame, then explicitly uploads it to
+OpenAI. `watch` continuously interprets selected webcam frames. `chat` integrates
+text/audio input, optional background vision, scalar sensor events, bounded history,
+explicit notes and optional speech. `listen`, `speak`, `devices`, `memory` and `calc`
+provide focused entry points. See README and execution guides for flags.
 
-Start with one package, not speculative services or a universal plugin framework.
-Keep modules grouped by capability when they grow. Do not add large placeholder
-hierarchies or recreate every legacy feature. The archive may be deleted once its
-useful behavior and historical references have been reviewed.
+Keep these semantics unless a requirement explicitly changes them:
 
-The first behavior uses simulated visual and touch observations: a touch requests
-current visual context, with explicit unavailable/stale handling. Run it with
-`uv run pragyantra demo` or add `--json` for response evidence. It uses a logical
-clock and records text rather than producing audio. It does not recognize images.
-World state retains one latest acquired scene; it is not a complete world model.
+- `WorldState` retains one newest acquired scene and at most 32 scalar channels.
+  It is not tracking, mapping, identity recognition or a complete world model.
+  Preserve acquisition/receipt/snapshot/response distinctions. Reject future
+  evidence; older/equal acquisitions do not replace new ones. Freshness includes
+  perception delay up to snapshot time; generated replies add unbounded semantic
+  delay and do not re-evaluate wording at playback.
+- Images normalize to at most 1024 pixels on the longest edge. Provider detail
+  changes API preprocessing, not that normalization limit. File acquisition is not
+  the historical photo capture time unless explicitly supplied. No confidence is
+  invented. Vision uses low detail/no reasoning/short output/store=False/no retries.
+- Continuous camera capture owns open/read/release on one worker, replaces one
+  pending raw frame, and normalizes only selected frames. Vision inference is
+  serial, paced after result handling. Native driver calls can delay shutdown.
+- `watch --temporal-context` is opt in. Pass one flat previous scene only for the
+  same source, advancing acquisition time, gap <=30 s by default, description
+  <=1000 chars. Never nest context or use response time as frame gap. Label prior
+  text as untrusted; current image wins. No quality improvement has been shown.
+- Chat runs foreground turns plus optional background vision in a task group and
+  waits for the first visual result at startup. Failures stop/cancel siblings;
+  context managers release resources on completion, partial startup and failure.
+  Stdin sensor records wait behind foreground turns/output; no priority sensor
+  multiplexer, parallel conversation, automatic reconnect or retries exist.
+- Voice is half duplex: input closes before ASR, conversation and playback. A
+  64-block microphone queue fails on overflow. RMS endpointing is a heuristic,
+  not neural VAD. PCM/WAV limits and timeouts are explicit; no barge-in. Synthesis
+  requests PCM to avoid streaming WAV headers; native adapters assume little-endian
+  hosts. Speech is disclosed as AI-generated. Device operations can delay cancellation.
+- History is bounded to complete exchanges (12 turns/24,000 chars). Notes are
+  explicit, <=2000 chars, <=1000 records; SQLite persistence is opt in. Default
+  recall is local keywords; opt-in semantic mode embeds new notes/queries, compares
+  matching model/dimensions, and has an unevaluated 0.3 cosine threshold. No
+  automatic transcript persistence, legacy pickle loading or silent backfill.
+- Deterministic commands dispatch in code; generated conversation has no tools or
+  actuator authority. Device JSONL is a strict version-1 observation boundary with
+  explicit units/timestamps, not a selected physical transport or controller.
 
-`uv run --env-file .env pragyantra see IMAGE --json` reads and normalizes a local
-image and explicitly sends it to OpenAI. The provider uses Responses with
-`gpt-5.6-luna` by default, low image detail, no reasoning, a short output limit,
-`store=False`, and no automatic retries. These are configurable engineering choices,
-not measured accuracy or performance claims. API credentials stay in environment
-variables or ignored `.env`; `.env.example` contains placeholders only.
+Manual file/webcam vision smoke checks were reported successful on October 20,
+2026. The synthetic hosted TTS/ASR/semantic-conversation check also passed; see
+`docs/experiments/`. Actual microphone/speaker operation, sustained capture,
+representative model evaluation, control timing and Pi deployment remain unverified.
+Keep all status documentation aligned with new evidence and limitations.
 
-Image acquisition, the provider contract, and interpretation-to-observation mapping
-are separate. Provider/model and requested image detail are retained without
-inventing confidence. `--image-detail` changes provider preprocessing; the file
-loader still normalizes uploads to at most 1024 pixels on the longest edge.
-For files, the default timestamp is pipeline acquisition, not the photo's historical
-capture time; `--captured-at` accepts a known time. This path uses the real clock,
-preserves acquisition time through inference, and retains simulated touch/output.
-A manual live API smoke test and a three-image check succeeded on October 20,
-2026. `docs/experiments/2026-10-20-vision-smoke.md` records descriptions, sources,
-and timing; systematic accuracy and latency evaluation remain outstanding.
-No Google Cloud setup is required by the current implementation.
-
-`uv run --extra webcam --env-file .env pragyantra see --webcam 0 --json` captures
-one frame through `inputs/webcam.py`. OpenCV is optional and imported on capture,
-not at module import. File and webcam adapters share image normalization and
-return `ImageFrame`; future camera adapters should preserve that boundary. The
-webcam is released before inference, including on acquisition/normalization errors.
-Its timestamp is host read-start, not sensor exposure time; buffering can conceal
-older frames. Blocking driver calls can delay cancellation and release, and the
-provider timeout does not bound acquisition. Automated tests use synthetic pixels
-and fake devices. A manual webcam smoke test was reported successful on October 20,
-2026; device details, repeated-run reliability, and capture timing were not recorded.
-
-`uv run --extra webcam --env-file .env pragyantra watch --interval 5 --count 3 --json`
-uses `WebcamStream` and `application/observation_loop.py:VisualObservationLoop`.
-One camera worker owns open/read/release; a producer replaces one pending raw
-frame while inference or pacing is busy. Only selected frames are normalized.
-The application consumes `ImageSource` and `VisionProvider`, performs serial
-inference, preserves acquisition/receipt timing, and retains latest context in
-`WorldState`. The interval is a delay after result handling, not a fixed rate.
-CLI output streams immediately without retaining a response history. A finite
-count stops normally; omitting it runs until Ctrl+C. Errors stop without retries.
-Cleanup stops the producer, waits for active device work, releases on the same
-worker, and joins it. Driver calls can delay shutdown. Continuous operation has
-automated tests and a successful manual smoke test reported on October 20, 2026;
-test duration, device details, settings, and timings were not recorded. Prior descriptions are not
-fed back into prompts; temporal context remains a separate candidate experiment.
-This path inspects observations directly rather than simulating touch requests.
-
-The runtime consumes one async stream and awaits each output. Resource contexts
-close on completion, failure, and cancellation. Live sensor multiplexing, parallel
-inference, and speech interruption are not implemented. The webcam has one pending
-frame slot; other device queue policies remain undefined. Define those semantics
-when adding adapters. Preserve acquisition/receipt/response
-time distinctions; freshness must include inference and processing delay.
-
-For hardware, state assumptions and consult datasheets/official documentation
-before committing to electrical interfaces. Keep deadline-sensitive control and
-physical device limits local; higher-level inference may select goals/actions.
-Consult live provider documentation before implementing version-dependent APIs.
-
-## Development and validation
-
-From the repository root:
+## Validation and data handling
 
 ```bash
-uv sync --locked
+uv sync --locked --all-extras
 uv run pragyantra --help
 uv run pragyantra --version
-uv run pragyantra demo
-uv run pytest -q
+uv run pragyantra demo --json
+uv run --locked --all-extras pytest -q
 uv run ruff check .
 uv run ruff format --check .
 uv build
+git diff --check
 ```
 
-Runtime dependencies are OpenAI and Pillow. Ruff, pytest, and an SDK-compatible
-mock HTTP transport are development tools; no CI workflow has been added.
-OpenCV is in the optional `webcam` extra. Run `uv run --locked --extra webcam pytest -q`
-to include synthetic OpenCV capture tests; base tests skip that optional module.
-Add focused tests for implemented behavior,
-using fake providers/devices and temporary storage so normal tests need no
-credentials, hardware, paid calls, or downloads. Async tests use `asyncio.run` and
-logical clocks rather than wall-clock sleeps. Do not test empty scaffolding just
-to increase test counts. Introduce additional tools through `uv` when needed.
+Use focused tests for implemented behavior, fake services/devices, synthetic
+pixels/audio, temporary databases, logical clocks and explicit synchronization.
+Normal tests need no credentials, hardware, paid calls or downloads. Base tests
+skip optional OpenCV capture conversion; all-extras runs include it. Async tests
+use `asyncio.run`. Do not test empty scaffolding or invent performance numbers.
+Report verification and outstanding hardware/model checks accurately.
 
-Keep edits scoped. Run relevant checks and `git diff --check`; report what was
-verified and what remains untested. Never claim package checks validate an actual
-robot, model accuracy, control timing, or edge deployment. Keep documentation
-honest about implemented, experimental, and planned capabilities.
-
-Keep credentials, weights, recordings, and personal memory out of commits.
-`.env`, `.env.*` (except `.env.example`), `models/`, `memory_stream/`, `data/`, and
-`*.pkl` are ignored. Exercise filesystem actions only against temporary fixtures.
+Keep credentials, weights, recordings and personal memory out of commits.
+`.env`, `.env.*` except `.env.example`, `models/`, `memory_stream/`, `data/`, and
+`*.pkl` are ignored. Filesystem-action tests operate only on temporary fixtures.
+Never run historical installers or load legacy serialized Python objects. No CI
+workflow exists; local automated checks and documented manual experiments are
+separate evidence.

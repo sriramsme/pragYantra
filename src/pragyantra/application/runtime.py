@@ -8,6 +8,7 @@ from datetime import UTC, datetime
 from pragyantra.application.behavior import DescribeOnTouch
 from pragyantra.application.interfaces import ObservationSource, ResponseOutput
 from pragyantra.application.models import (
+    SensorObservation,
     TouchObservation,
     VisualObservation,
     require_aware,
@@ -57,7 +58,7 @@ class AssistantRuntime:
                 last_received_at = event.received_at
                 observation = event.observation
                 match observation:
-                    case VisualObservation():
+                    case VisualObservation() | SensorObservation():
                         accepted = self.state.observe(observation)
                         _LOG.debug(
                             "Visual observation source=%s observed_at=%s "

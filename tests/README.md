@@ -26,7 +26,11 @@ uv run pytest -q
 - `test_observation_loop.py`: serial inference, pacing after output, bounded
   counts, context updates, acquisition timing, and cancellation with logical clocks.
 - `test_watch_cli.py`: output visible before the next request, finite completion,
-  failure cleanup without retries, and interval/count validation.
+  failure cleanup without retries, interval/count validation, and temporal-context
+  options/evidence.
+- `test_temporal_context.py`: opt-in selection, acquisition-time gaps, size/source/
+  time boundaries, flat context snapshots, and validation before provider calls.
+  The mocked SDK tests also check labeled context data and unchanged baseline prompts.
 
 Use simulated observations, fake providers, and temporary storage for normal tests.
 They should run without model downloads, credentials, network access, or devices.
@@ -37,4 +41,26 @@ standard-library event loop; no additional async test plugin is needed.
 Provider/device integration tests must be explicitly selected and document their
 setup and any API costs. No live integration tests exist yet. SDK contract tests
 make no network calls. Test collection is scoped to `tests/`,
-keeping the legacy prototype outside normal runs.
+without collecting historical code.
+
+## Assistant, audio, memory and device boundaries
+
+- `test_conversation.py`: sensory snapshots, recalled notes, bounded complete
+  exchanges, deterministic commands, failed-turn atomicity and semantic recall.
+- `test_notes.py`: in-memory/SQLite repositories, reopen, date bounds, forget,
+  capacity, safe query text, schema migration and embedding compatibility/validation.
+- `test_audio.py`: WAV/PCM validation, acquisition timestamps, energy endpointing,
+  pre-roll, noise bursts and bounded utterances using synthetic samples.
+- `test_audio_devices.py`: fake PortAudio capture/playback, overflow, failed start,
+  cancellation and device close; no real microphones or speakers.
+- `test_console.py`: cancellable pipe reads and restoration of stdin flags.
+- `test_device_events.py`: strict version/type/field/unit/value/time validation.
+- `test_openai_services.py`: actual SDK over mock HTTP for conversation, ASR, PCM
+  synthesis and embeddings, with errors/timeouts and explicit request settings.
+- `test_assistant_cli.py`: subprocess note persistence/calculation and JSONL events;
+  integrated fake camera + audio + conversation + speech, half-duplex ordering,
+  startup/perception/output failure and cancellation cleanup.
+
+A synthetic paid-service smoke check is documented in
+[the experiment log](../docs/experiments/2026-10-20-assistant-smoke.md); it is not
+an automatically executed test or evidence of physical audio-device performance.

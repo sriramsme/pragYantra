@@ -3,11 +3,14 @@
 from collections.abc import AsyncIterator
 from typing import Protocol
 
+from pragyantra.application.audio import AudioClip
 from pragyantra.application.models import (
     ContextResponse,
     ImageFrame,
     ObservationEvent,
+    PreviousSceneContext,
     SceneDescription,
+    TextObservation,
 )
 
 
@@ -20,12 +23,26 @@ class ResponseOutput(Protocol):
 
 
 class VisionProvider(Protocol):
-    async def describe(self, image: ImageFrame) -> SceneDescription: ...
+    async def describe(
+        self, image: ImageFrame, *, previous: PreviousSceneContext | None = None
+    ) -> SceneDescription: ...
 
 
 class ImageSource(Protocol):
     async def read(self) -> ImageFrame: ...
 
 
-class VisionError(RuntimeError):
+class TranscriptionProvider(Protocol):
+    async def transcribe(self, audio: AudioClip) -> TextObservation: ...
+
+
+class SpeechProvider(Protocol):
+    async def synthesize(self, text: str) -> AudioClip: ...
+
+
+class ProviderError(RuntimeError):
+    """A sanitized external capability failure."""
+
+
+class VisionError(ProviderError):
     """An actionable provider error safe to display without SDK request details."""

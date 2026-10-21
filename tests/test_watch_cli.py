@@ -23,9 +23,9 @@ def install_components(monkeypatch, *, fail_second=False, before_second=None):
     async def sleep(seconds):
         events.append(("wait", seconds))
 
-    def observer(interval, *, count):
+    def observer(interval, *, count, **settings):
         assert interval == timedelta(seconds=5)
-        result = real_observer(interval, count=count, sleep=sleep)
+        result = real_observer(interval, count=count, sleep=sleep, **settings)
         observers.append(result)
         return result
 
@@ -33,6 +33,7 @@ def install_components(monkeypatch, *, fail_second=False, before_second=None):
         def __init__(self, index):
             assert index == 2
             self.reads = 0
+            self.captured_at = datetime.now(UTC) - timedelta(seconds=30)
 
         async def __aenter__(self):
             events.append("camera opened")
@@ -44,14 +45,19 @@ def install_components(monkeypatch, *, fail_second=False, before_second=None):
         async def read(self):
             self.reads += 1
             return ImageFrame(
-                "fake.camera", datetime.now(UTC), str(self.reads).encode()
+                "fake.camera",
+                self.captured_at + timedelta(seconds=self.reads * 7),
+                str(self.reads).encode(),
             )
 
     class Vision:
-        calls = 0
+        def __init__(self):
+            self.calls = 0
+            self.contexts = []
 
-        async def describe(self, image):
+        async def describe(self, image, *, previous=None):
             self.calls += 1
+            self.contexts.append(previous)
             if self.calls == 2:
                 if before_second:
                     before_second()
@@ -96,6 +102,7 @@ def test_watch_streams_each_result_and_closes_resources_at_count(monkeypatch, ca
     assert all(record["kind"] == "visual_observation" for record in records)
     assert all(record["visual_age_seconds"] >= 0 for record in records)
     assert all(record["image_detail"] == "low" for record in records)
+    assert all(record["previous_context"] is None for record in records)
     assert vision.calls == 2
     assert observers[0].state.visual.description == "Scene 2"
     assert events == [
@@ -124,6 +131,37 @@ def test_watch_provider_error_stops_without_retry_and_closes_contexts(
     assert events[-2:] == ["camera closed", "provider closed"]
 
 
+def test_watch_temporal_option_records_exact_context_used(monkeypatch, capsys):
+    _, vision, _ = install_components(monkeypatch)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "pragyantra",
+            "watch",
+            "--webcam",
+            "2",
+            "--count",
+            "2",
+            "--temporal-context",
+            "--context-max-gap",
+            "30",
+            "--json",
+        ],
+    )
+    cli.main()
+    first, second = [json.loads(line) for line in capsys.readouterr().out.splitlines()]
+    assert first["previous_context"] is None
+    previous = second["previous_context"]
+    assert previous["description"] == first["description"]
+    assert previous["observed_at"] == first["observed_at"]
+    assert previous["gap_seconds"] == 7
+    assert previous["provider"] == "fake"
+    assert previous["model"] == "test-model"
+    assert "previous_context" not in previous
+    assert vision.contexts[1].gap == timedelta(seconds=7)
+
+
 @pytest.mark.parametrize(
     "arguments",
     [
@@ -132,6 +170,8 @@ def test_watch_provider_error_stops_without_retry_and_closes_contexts(
         ["--count", "0"],
         ["--count", "-1"],
         ["--count", "1.5"],
+        ["--context-max-gap", "30"],
+        ["--temporal-context", "--context-max-gap", "0"],
     ],
 )
 def test_watch_rejects_invalid_pacing_or_count(monkeypatch, arguments):
