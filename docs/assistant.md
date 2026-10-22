@@ -79,6 +79,8 @@ descriptions; the application prints it rather than creating a session log.
 | `/help` | Show commands |
 | `/quit`, `/exit` | Exit text input |
 | `/stop` | End the local runner session; send no physical stop command |
+| `/profile [KIND KEY VALUE]` | List or set explicit names, preferences or named observations |
+| `/unprofile KIND KEY` | Remove explicit companion context |
 
 `--commands-only` disables hosted capabilities and accepts deterministic commands.
 It cannot combine with audio, webcam, spoken output, semantic memory or interpretation.
@@ -90,6 +92,9 @@ History retains complete exchanges within 12 turns and 24,000 characters. Failed
 model responses do not enter history. `/reset` leaves history empty. Forgetting a
 note does not erase text already present in recent exchanges; reset history too
 when needed. Full conversation history is never persisted automatically.
+Companion context is bounded separately and persists with `--memory`; see
+[saved context](companion.md). Conversation JSON includes the exact saved-context
+snapshot supplied to the provider, separate from current sensory evidence.
 
 ## Provider and lifecycle choices
 

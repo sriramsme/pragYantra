@@ -38,6 +38,7 @@ def result_record(result: ConversationResult) -> dict[str, object]:
         "responded_at": result.responded_at.isoformat(),
         "environment": result.environment.to_record(),
         "memory_ids": [note.id for note in result.memories],
+        "companion": [entry.to_record() for entry in result.companion],
     }
 
 
@@ -66,6 +67,7 @@ async def run_assistant(args):
         session = ConversationSession(
             services or CommandsOnly(),
             notes=notes,
+            companion=notes.companion if notes is not None else None,
             embeddings=services if args.semantic_memory else None,
             max_context_age=args.context_max_age,
         )

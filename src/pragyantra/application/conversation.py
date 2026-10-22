@@ -7,6 +7,12 @@ from datetime import UTC, datetime, timedelta
 from typing import Protocol
 
 from pragyantra.application.actions import calculate
+from pragyantra.application.companion import (
+    CompanionEntry,
+    CompanionRepository,
+    ContextKind,
+    InMemoryCompanion,
+)
 from pragyantra.application.memory import (
     ChatMessage,
     ConversationHistory,
@@ -25,6 +31,7 @@ class ConversationRequest:
     history: tuple[ChatMessage, ...]
     environment: EnvironmentSnapshot
     memories: tuple[MemoryNote, ...]
+    companion: tuple[CompanionEntry, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -51,11 +58,13 @@ class ConversationResult:
     environment: EnvironmentSnapshot
     memories: tuple[MemoryNote, ...]
     responded_at: datetime
+    companion: tuple[CompanionEntry, ...] = ()
 
 
 HELP = (
     "Commands: /context, /calc EXPRESSION, /remember TEXT, /recall QUERY, "
-    "/forget ID, /reset, /help, /quit. /stop ends an AssistantRunner session. "
+    "/forget ID, /profile [KIND KEY VALUE], /unprofile KIND KEY, /reset, /help, "
+    "/quit. /stop ends an AssistantRunner session. "
     "Other input starts a conversation unless request interpretation is enabled."
 )
 
@@ -67,6 +76,7 @@ class ConversationSession:
         *,
         state: WorldState | None = None,
         notes: NoteRepository | None = None,
+        companion: CompanionRepository | None = None,
         max_context_age: timedelta = timedelta(seconds=5),
         now=None,
         max_turns: int = 12,
@@ -78,6 +88,7 @@ class ConversationSession:
         self.provider = provider
         self.state = state if state is not None else WorldState()
         self.notes = notes if notes is not None else InMemoryNotes()
+        self.companion = companion if companion is not None else InMemoryCompanion()
         self.history = ConversationHistory(max_turns=max_turns)
         self.max_context_age = max_context_age
         self._now = now or (lambda: datetime.now(UTC))
@@ -88,6 +99,40 @@ class ConversationSession:
             return None
         command, _, argument = text.partition(" ")
         argument = argument.strip()
+        if command == "/profile":
+            if not argument:
+                records = [entry.to_record() for entry in self.companion.entries()]
+                text = json.dumps(records, ensure_ascii=False)
+                if len(text) > 12000:
+                    # Keep a full store readable within the existing reply bound.
+                    records = [
+                        dict(
+                            row,
+                            value=row["value"][:40],
+                            truncated=len(row["value"]) > 40,
+                        )
+                        for row in records
+                    ]
+                    text = json.dumps(records, ensure_ascii=False)
+                return text
+            parts = argument.split(maxsplit=2)
+            if len(parts) != 3:
+                raise ValueError("Use /profile KIND KEY VALUE")
+            self.companion.set(
+                CompanionEntry(
+                    ContextKind(parts[0]), parts[1], parts[2], environment.as_of
+                )
+            )
+            return "Saved explicit companion context."
+        if command == "/unprofile":
+            parts = argument.split()
+            if len(parts) != 2:
+                raise ValueError("Use /unprofile KIND KEY")
+            return (
+                "Context removed."
+                if self.companion.delete(ContextKind(parts[0]), parts[1])
+                else "No matching context."
+            )
         if command == "/help":
             return HELP
         if command == "/context":
@@ -142,12 +187,18 @@ class ConversationSession:
             environment = self.state.snapshot(at=at, max_age=self.max_context_age)
             command = await self._command(message.text.strip(), environment)
             memories: tuple[MemoryNote, ...] = ()
+            companion: tuple[CompanionEntry, ...] = ()
             if command is not None:
                 reply = GeneratedReply(command, "builtin", "commands-v1")
             else:
+                companion = self.companion.entries()
                 memories = await self._recall(message.text[:2000])
                 request = ConversationRequest(
-                    message, self.history.messages, environment, memories
+                    message,
+                    self.history.messages,
+                    environment,
+                    memories,
+                    companion,
                 )
                 reply = await self.provider.respond(request)
             finished = self._now()
@@ -156,4 +207,6 @@ class ConversationSession:
                 raise ValueError("Response clock moved backwards")
             if message.text.strip() != "/reset":
                 self.history.append(message.text, reply.text)
-            return ConversationResult(message, reply, environment, memories, finished)
+            return ConversationResult(
+                message, reply, environment, memories, finished, companion
+            )

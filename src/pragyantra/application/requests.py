@@ -9,7 +9,14 @@ from typing import Protocol
 
 from pragyantra.application.conversation import ConversationResult, ConversationSession
 from pragyantra.application.interfaces import ProviderError
-from pragyantra.application.models import ContextStatus, TextObservation, require_aware
+from pragyantra.application.models import (
+    ContextStatus,
+    TextObservation,
+    require_aware,
+)
+from pragyantra.application.models import (
+    is_probability as probability,
+)
 from pragyantra.application.world_state import EnvironmentSnapshot
 
 QUESTION_VERSION = "intent-v1"
@@ -32,10 +39,6 @@ class RequestStatus(StrEnum):
     UNKNOWN = "unknown"
     PROVIDER_FAILURE = "provider_failure"
     STOPPED = "stopped"
-
-
-def probability(value: float) -> bool:
-    return type(value) in (int, float) and 0 <= value <= 1 and math.isfinite(value)
 
 
 @dataclass(frozen=True, slots=True)

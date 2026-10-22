@@ -265,6 +265,11 @@ def _run(argv: list[str], *, prog: str) -> None:
         parser.print_help()
         return
     try:
+        if args.command == "inspect":
+            from pragyantra.cli.inspection import inspect_image
+
+            asyncio.run(inspect_image(args))
+            return
         if args.command == "interpret":
             from pragyantra.cli.requests import interpret
 
@@ -285,10 +290,10 @@ def _run(argv: list[str], *, prog: str) -> None:
 
             devices()
             return
-        if args.command == "memory":
-            from pragyantra.cli.memory import run_memory
+        if args.command in ("memory", "profile"):
+            from pragyantra.cli.memory import run_memory, run_profile
 
-            run_memory(args)
+            run_profile(args) if args.command == "profile" else run_memory(args)
             return
         if args.command == "calc":
             from pragyantra.application.actions import calculate

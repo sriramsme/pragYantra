@@ -106,6 +106,13 @@ initial visual result each time. Use separate sessions/runners for independent
 conversations. The host remains responsible for admission/backpressure if serving
 many callers; this API does not create an unbounded request queue.
 
+For saved context, pass `companion=notes.companion` to `ConversationSession` while
+the host's `SQLiteNotes` context is open, or provide an in-memory implementation.
+The session retains exactly the snapshot sent for each conversational result;
+see [companion context](companion.md). Direct configured image judgments use the
+separate `ImageInspector` API so a host can evaluate a supplied frame without a
+conversation or caption; see [inspection embedding](inspection.md#embed-without-a-subprocess).
+
 ## Timing, audio and integration limits
 
 Input acquisition times are preserved and future observations are rejected.

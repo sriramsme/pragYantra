@@ -1,12 +1,17 @@
 # Working context and explicit memory
 
-These are three distinct kinds of state:
+These are distinct kinds of state:
 
 | State | Lifetime and bound | Purpose |
 | --- | --- | --- |
 | `WorldState` | Current process; one visual scene and 32 scalar channels | Latest acquired sensory evidence, with freshness |
 | `ConversationHistory` | Current session; 12 complete exchanges / 24,000 characters | Recent conversational continuity |
 | Explicit notes | In-memory by default, or SQLite when selected; 1,000 notes | User-directed persistence and recall |
+| Companion context | Session-only or selected SQLite database; 32 entries | Explicit names, preferences and named observations |
+
+See [companion context](companion.md) for `profile` and `/profile`. Schema version
+3 adds its separate table while preserving old notes/embeddings. Saved descriptions
+do not become current visual evidence or scalar measurements.
 
 The assistant does not automatically turn transcripts, images, or statements in
 model replies into durable facts. Explicit notes are untrusted remembered text,

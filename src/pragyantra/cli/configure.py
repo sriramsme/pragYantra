@@ -6,6 +6,23 @@ from pathlib import Path
 
 
 def add_commands(commands, *, duration, count, timestamp, camera_index):
+    inspect = commands.add_parser(
+        "inspect", help="Judge image conditions directly with OpenAI Decisions"
+    )
+    inspect.add_argument("image", type=Path, nargs="?")
+    inspect.add_argument("--camera", "--webcam", type=camera_index, nargs="?", const=0)
+    inspect.add_argument("--condition", action="append", default=[], metavar="TEXT")
+    inspect.add_argument("--questions", type=Path, help="JSON question definitions")
+    inspect.add_argument("--captured-at", type=timestamp)
+    inspect.add_argument("--max-age", type=duration, default=timedelta(seconds=5))
+    inspect.add_argument("--timeout", type=duration, default=timedelta(seconds=10))
+    inspect.add_argument(
+        "--model", default=os.getenv("PRAGYANTRA_INSPECTION_MODEL", "gpt-6-luna")
+    )
+    inspect.add_argument(
+        "--image-detail", choices=["low", "high", "auto", "original"], default="low"
+    )
+    inspect.add_argument("-j", "--json", action="store_true")
     chat = commands.add_parser(
         "chat",
         usage="%(prog)s [OPTIONS]",
@@ -242,8 +259,29 @@ def add_commands(commands, *, duration, count, timestamp, camera_index):
         search.add_argument("--since", type=timestamp)
         search.add_argument("--until", type=timestamp)
 
+    profile = commands.add_parser(
+        "profile", help="Manage explicit saved companion context"
+    )
+    profile.add_argument("--database", type=Path, default=Path("data/notes.sqlite"))
+    profile_ops = profile.add_subparsers(dest="operation", required=True)
+    setting = profile_ops.add_parser("set")
+    setting.add_argument("kind", choices=["name", "preference", "observation"])
+    setting.add_argument("key")
+    setting.add_argument("value")
+    deleting = profile_ops.add_parser("delete")
+    deleting.add_argument("kind", choices=["name", "preference", "observation"])
+    deleting.add_argument("key")
+    profile_ops.add_parser("list")
+
 
 def validate(args, parser):
+    if args.command == "inspect":
+        if (args.image is None) == (args.camera is None):
+            parser.error("inspect requires an image file or --camera")
+        if args.camera is not None and args.captured_at is not None:
+            parser.error("--captured-at applies only to image files")
+        if not args.condition and args.questions is None:
+            parser.error("inspect requires --condition or --questions")
     if args.command == "listen":
         if args.file is not None and args.microphone:
             parser.error("Choose a WAV file or --microphone, not both")

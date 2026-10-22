@@ -1,0 +1,66 @@
+{
+  "kind": "request_result",
+  "status": "conversation",
+  "text": "Hello, Casey!",
+  "input": {
+    "source": "console.argument",
+    "observed_at": "2026-10-22T01:35:40.964090+00:00",
+    "text": "Hello! Please greet me by my saved name.",
+    "provider": null,
+    "model": null
+  },
+  "responded_at": "2026-10-22T01:35:43.279066+00:00",
+  "judged_at": "2026-10-22T01:35:41.137695+00:00",
+  "judgment": {
+    "intent": "conversation",
+    "probabilities": {
+      "conversation": 0.86,
+      "inspect": 0.0,
+      "follow": 0.0,
+      "run_named_mission": 0.0,
+      "remember": 0.0,
+      "unknown": 0.14
+    },
+    "confidence": 0.83,
+    "provider": "typesafe",
+    "model": "jev-1.14.0",
+    "question_version": "intent-v1",
+    "input_tokens": 583
+  },
+  "environment": null,
+  "scene_status": null,
+  "conversation": {
+    "kind": "conversation",
+    "text": "Hello, Casey!",
+    "provider": "openai",
+    "model": "gpt-5.6-luna",
+    "input": {
+      "source": "console.argument",
+      "observed_at": "2026-10-22T01:35:40.964090+00:00",
+      "text": "Hello! Please greet me by my saved name.",
+      "provider": null,
+      "model": null
+    },
+    "responded_at": "2026-10-22T01:35:43.279066+00:00",
+    "environment": {
+      "as_of": "2026-10-22T01:35:41.137730+00:00",
+      "visual": null,
+      "sensors": []
+    },
+    "memory_ids": [],
+    "companion": [
+      {
+        "kind": "name",
+        "key": "user",
+        "value": "Casey",
+        "updated_at": "2026-10-22T01:35:40.023625+00:00"
+      },
+      {
+        "kind": "preference",
+        "key": "interaction_style",
+        "value": "One brief sentence",
+        "updated_at": "2026-10-22T01:35:40.176944+00:00"
+      }
+    ]
+  }
+}

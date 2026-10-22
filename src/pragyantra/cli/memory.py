@@ -3,7 +3,27 @@
 import json
 from datetime import UTC, datetime
 
+from pragyantra.application.companion import CompanionEntry, ContextKind
 from pragyantra.providers.memory import SQLiteNotes
+
+
+def run_profile(args):
+    with SQLiteNotes(args.database) as notes:
+        context = notes.companion
+        if args.operation == "set":
+            context.set(
+                CompanionEntry(
+                    ContextKind(args.kind), args.key, args.value, datetime.now(UTC)
+                )
+            )
+        elif args.operation == "delete":
+            print(
+                json.dumps(
+                    {"deleted": context.delete(ContextKind(args.kind), args.key)}
+                )
+            )
+            return
+        print(json.dumps([entry.to_record() for entry in context.entries()]))
 
 
 def run_memory(args):

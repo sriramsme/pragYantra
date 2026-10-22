@@ -54,6 +54,8 @@ prag speak 'Hello'                        # synthesize and play
 prag speak 'Hello' -o data/hello.wav       # save WAV without playback
 prag devices                             # enumerate audio devices
 prag calc 'sqrt(16) + 2**3'               # local arithmetic
+prag inspect photo.jpg --condition 'Is a red mug visible?' -j
+prag profile set name user Casey          # explicitly save companion context
 prag demo -j                             # simulation as JSON lines
 ```
 
@@ -96,3 +98,5 @@ and model defaults. The application never creates a credential file automaticall
 See [assistant](assistant.md), [vision](vision.md), [webcam](webcam.md),
 [audio](audio.md), [memory](memory.md), and
 [request interpretation](request-interpretation.md) guides for capability details.
+Direct image judgments and saved companion entries have separate
+[inspection](inspection.md) and [companion](companion.md) guides.

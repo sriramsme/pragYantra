@@ -1,0 +1,1450 @@
+{
+  "cases": 8,
+  "predicate_decided": 8,
+  "false_positives": 0,
+  "false_negatives": 0,
+  "station_correct": 8,
+  "stale_results": 0,
+  "provider_failures": 0,
+  "refusals": 0,
+  "median_seconds": 0.2835045,
+  "p95_seconds_nearest_rank": 1.28481,
+  "reported_input_tokens": 4048,
+  "reported_output_tokens": 0,
+  "usage_missing_cases": 0,
+  "estimated_usd_for_reported_usage": null,
+  "assumed_usd_per_million": {
+    "input": null,
+    "output": null
+  },
+  "records": [
+    {
+      "id": "red-square",
+      "expected": {
+        "red_visible": true,
+        "station": "red"
+      },
+      "result": {
+        "kind": "image_inspection",
+        "status": "completed",
+        "evidence": {
+          "id": "sha256:2678efcc113e2924eb359838630f530d653049b1799bf7c22045bdf3b5ecbbf2",
+          "source": "synthetic:red-square",
+          "acquired_at": "2026-10-22T01:34:30.090579+00:00"
+        },
+        "requested_at": "2026-10-22T01:34:30.096626+00:00",
+        "completed_at": "2026-10-22T01:34:31.374800+00:00",
+        "consumed_at": "2026-10-22T01:34:31.374843+00:00",
+        "max_age_seconds": 5.0,
+        "questions": [
+          {
+            "name": "red_visible",
+            "instructions": "Is any clearly red shape visible in the image?",
+            "kind": "predicate",
+            "options": [],
+            "version": "1"
+          },
+          {
+            "name": "station",
+            "instructions": "Which synthetic station marker best matches the image? Choose none if there is no red or blue shape.",
+            "kind": "choice",
+            "options": [
+              [
+                "red",
+                "A red geometric shape on white"
+              ],
+              [
+                "blue",
+                "A blue geometric shape on white"
+              ],
+              [
+                "none",
+                "Neither, or unclear"
+              ]
+            ],
+            "version": "1"
+          },
+          {
+            "name": "coverage",
+            "instructions": "How much of the image is occupied by a red shape?",
+            "kind": "score",
+            "options": [
+              [
+                "none",
+                "No red pixels"
+              ],
+              [
+                "some",
+                "Some red, less than half the image"
+              ],
+              [
+                "most",
+                "Red occupies at least half the image"
+              ]
+            ],
+            "version": "1"
+          }
+        ],
+        "batch": {
+          "judgments": [
+            {
+              "question": {
+                "name": "red_visible",
+                "instructions": "Is any clearly red shape visible in the image?",
+                "kind": "predicate",
+                "options": [],
+                "version": "1"
+              },
+              "value": null,
+              "probability": 1.0,
+              "confidence": null,
+              "probabilities": [],
+              "refused": false
+            },
+            {
+              "question": {
+                "name": "station",
+                "instructions": "Which synthetic station marker best matches the image? Choose none if there is no red or blue shape.",
+                "kind": "choice",
+                "options": [
+                  [
+                    "red",
+                    "A red geometric shape on white"
+                  ],
+                  [
+                    "blue",
+                    "A blue geometric shape on white"
+                  ],
+                  [
+                    "none",
+                    "Neither, or unclear"
+                  ]
+                ],
+                "version": "1"
+              },
+              "value": "red",
+              "probability": null,
+              "confidence": 1.0,
+              "probabilities": [
+                [
+                  "red",
+                  1.0
+                ],
+                [
+                  "blue",
+                  0.0
+                ],
+                [
+                  "none",
+                  0.0
+                ]
+              ],
+              "refused": false
+            },
+            {
+              "question": {
+                "name": "coverage",
+                "instructions": "How much of the image is occupied by a red shape?",
+                "kind": "score",
+                "options": [
+                  [
+                    "none",
+                    "No red pixels"
+                  ],
+                  [
+                    "some",
+                    "Some red, less than half the image"
+                  ],
+                  [
+                    "most",
+                    "Red occupies at least half the image"
+                  ]
+                ],
+                "version": "1"
+              },
+              "value": 1.99,
+              "probability": null,
+              "confidence": 0.99,
+              "probabilities": [
+                [
+                  "none",
+                  0.0
+                ],
+                [
+                  "some",
+                  0.01
+                ],
+                [
+                  "most",
+                  0.99
+                ]
+              ],
+              "refused": false
+            }
+          ],
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "input_tokens": 506,
+          "output_tokens": 0
+        }
+      },
+      "status": "completed",
+      "input_tokens": 506,
+      "output_tokens": 0,
+      "refusals": 0,
+      "prediction": true,
+      "station": "red",
+      "elapsed_seconds": 1.28481
+    },
+    {
+      "id": "blue-square",
+      "expected": {
+        "red_visible": false,
+        "station": "blue"
+      },
+      "result": {
+        "kind": "image_inspection",
+        "status": "completed",
+        "evidence": {
+          "id": "sha256:09ad7ab2394b006c8d93f7d73b881b4d1766c0a485b3c78ab0fb44f2eaa1d8fd",
+          "source": "synthetic:blue-square",
+          "acquired_at": "2026-10-22T01:34:31.375176+00:00"
+        },
+        "requested_at": "2026-10-22T01:34:31.375832+00:00",
+        "completed_at": "2026-10-22T01:34:31.568406+00:00",
+        "consumed_at": "2026-10-22T01:34:31.568459+00:00",
+        "max_age_seconds": 5.0,
+        "questions": [
+          {
+            "name": "red_visible",
+            "instructions": "Is any clearly red shape visible in the image?",
+            "kind": "predicate",
+            "options": [],
+            "version": "1"
+          },
+          {
+            "name": "station",
+            "instructions": "Which synthetic station marker best matches the image? Choose none if there is no red or blue shape.",
+            "kind": "choice",
+            "options": [
+              [
+                "red",
+                "A red geometric shape on white"
+              ],
+              [
+                "blue",
+                "A blue geometric shape on white"
+              ],
+              [
+                "none",
+                "Neither, or unclear"
+              ]
+            ],
+            "version": "1"
+          },
+          {
+            "name": "coverage",
+            "instructions": "How much of the image is occupied by a red shape?",
+            "kind": "score",
+            "options": [
+              [
+                "none",
+                "No red pixels"
+              ],
+              [
+                "some",
+                "Some red, less than half the image"
+              ],
+              [
+                "most",
+                "Red occupies at least half the image"
+              ]
+            ],
+            "version": "1"
+          }
+        ],
+        "batch": {
+          "judgments": [
+            {
+              "question": {
+                "name": "red_visible",
+                "instructions": "Is any clearly red shape visible in the image?",
+                "kind": "predicate",
+                "options": [],
+                "version": "1"
+              },
+              "value": null,
+              "probability": 0.0,
+              "confidence": null,
+              "probabilities": [],
+              "refused": false
+            },
+            {
+              "question": {
+                "name": "station",
+                "instructions": "Which synthetic station marker best matches the image? Choose none if there is no red or blue shape.",
+                "kind": "choice",
+                "options": [
+                  [
+                    "red",
+                    "A red geometric shape on white"
+                  ],
+                  [
+                    "blue",
+                    "A blue geometric shape on white"
+                  ],
+                  [
+                    "none",
+                    "Neither, or unclear"
+                  ]
+                ],
+                "version": "1"
+              },
+              "value": "blue",
+              "probability": null,
+              "confidence": 1.0,
+              "probabilities": [
+                [
+                  "red",
+                  0.0
+                ],
+                [
+                  "blue",
+                  1.0
+                ],
+                [
+                  "none",
+                  0.0
+                ]
+              ],
+              "refused": false
+            },
+            {
+              "question": {
+                "name": "coverage",
+                "instructions": "How much of the image is occupied by a red shape?",
+                "kind": "score",
+                "options": [
+                  [
+                    "none",
+                    "No red pixels"
+                  ],
+                  [
+                    "some",
+                    "Some red, less than half the image"
+                  ],
+                  [
+                    "most",
+                    "Red occupies at least half the image"
+                  ]
+                ],
+                "version": "1"
+              },
+              "value": 0.01,
+              "probability": null,
+              "confidence": 0.99,
+              "probabilities": [
+                [
+                  "none",
+                  0.99
+                ],
+                [
+                  "some",
+                  0.01
+                ],
+                [
+                  "most",
+                  0.0
+                ]
+              ],
+              "refused": false
+            }
+          ],
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "input_tokens": 506,
+          "output_tokens": 0
+        }
+      },
+      "status": "completed",
+      "input_tokens": 506,
+      "output_tokens": 0,
+      "refusals": 0,
+      "prediction": false,
+      "station": "blue",
+      "elapsed_seconds": 0.193657
+    },
+    {
+      "id": "red-circle",
+      "expected": {
+        "red_visible": true,
+        "station": "red"
+      },
+      "result": {
+        "kind": "image_inspection",
+        "status": "completed",
+        "evidence": {
+          "id": "sha256:1d6f685a74682cedc6e8416c15c50a02d6a9f169c1b2c45baabddeea2f463911",
+          "source": "synthetic:red-circle",
+          "acquired_at": "2026-10-22T01:34:31.568780+00:00"
+        },
+        "requested_at": "2026-10-22T01:34:31.572362+00:00",
+        "completed_at": "2026-10-22T01:34:31.827891+00:00",
+        "consumed_at": "2026-10-22T01:34:31.827932+00:00",
+        "max_age_seconds": 5.0,
+        "questions": [
+          {
+            "name": "red_visible",
+            "instructions": "Is any clearly red shape visible in the image?",
+            "kind": "predicate",
+            "options": [],
+            "version": "1"
+          },
+          {
+            "name": "station",
+            "instructions": "Which synthetic station marker best matches the image? Choose none if there is no red or blue shape.",
+            "kind": "choice",
+            "options": [
+              [
+                "red",
+                "A red geometric shape on white"
+              ],
+              [
+                "blue",
+                "A blue geometric shape on white"
+              ],
+              [
+                "none",
+                "Neither, or unclear"
+              ]
+            ],
+            "version": "1"
+          },
+          {
+            "name": "coverage",
+            "instructions": "How much of the image is occupied by a red shape?",
+            "kind": "score",
+            "options": [
+              [
+                "none",
+                "No red pixels"
+              ],
+              [
+                "some",
+                "Some red, less than half the image"
+              ],
+              [
+                "most",
+                "Red occupies at least half the image"
+              ]
+            ],
+            "version": "1"
+          }
+        ],
+        "batch": {
+          "judgments": [
+            {
+              "question": {
+                "name": "red_visible",
+                "instructions": "Is any clearly red shape visible in the image?",
+                "kind": "predicate",
+                "options": [],
+                "version": "1"
+              },
+              "value": null,
+              "probability": 1.0,
+              "confidence": null,
+              "probabilities": [],
+              "refused": false
+            },
+            {
+              "question": {
+                "name": "station",
+                "instructions": "Which synthetic station marker best matches the image? Choose none if there is no red or blue shape.",
+                "kind": "choice",
+                "options": [
+                  [
+                    "red",
+                    "A red geometric shape on white"
+                  ],
+                  [
+                    "blue",
+                    "A blue geometric shape on white"
+                  ],
+                  [
+                    "none",
+                    "Neither, or unclear"
+                  ]
+                ],
+                "version": "1"
+              },
+              "value": "red",
+              "probability": null,
+              "confidence": 1.0,
+              "probabilities": [
+                [
+                  "red",
+                  1.0
+                ],
+                [
+                  "blue",
+                  0.0
+                ],
+                [
+                  "none",
+                  0.0
+                ]
+              ],
+              "refused": false
+            },
+            {
+              "question": {
+                "name": "coverage",
+                "instructions": "How much of the image is occupied by a red shape?",
+                "kind": "score",
+                "options": [
+                  [
+                    "none",
+                    "No red pixels"
+                  ],
+                  [
+                    "some",
+                    "Some red, less than half the image"
+                  ],
+                  [
+                    "most",
+                    "Red occupies at least half the image"
+                  ]
+                ],
+                "version": "1"
+              },
+              "value": 1.07,
+              "probability": null,
+              "confidence": 0.87,
+              "probabilities": [
+                [
+                  "none",
+                  0.01
+                ],
+                [
+                  "some",
+                  0.91
+                ],
+                [
+                  "most",
+                  0.08
+                ]
+              ],
+              "refused": false
+            }
+          ],
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "input_tokens": 506,
+          "output_tokens": 0
+        }
+      },
+      "status": "completed",
+      "input_tokens": 506,
+      "output_tokens": 0,
+      "refusals": 0,
+      "prediction": true,
+      "station": "red",
+      "elapsed_seconds": 0.259382
+    },
+    {
+      "id": "blue-circle",
+      "expected": {
+        "red_visible": false,
+        "station": "blue"
+      },
+      "result": {
+        "kind": "image_inspection",
+        "status": "completed",
+        "evidence": {
+          "id": "sha256:00177bf7d82190c2197cc66f080f5093ba665d4e2a35575778e2008583947423",
+          "source": "synthetic:blue-circle",
+          "acquired_at": "2026-10-22T01:34:31.828157+00:00"
+        },
+        "requested_at": "2026-10-22T01:34:31.828688+00:00",
+        "completed_at": "2026-10-22T01:34:32.046809+00:00",
+        "consumed_at": "2026-10-22T01:34:32.046848+00:00",
+        "max_age_seconds": 5.0,
+        "questions": [
+          {
+            "name": "red_visible",
+            "instructions": "Is any clearly red shape visible in the image?",
+            "kind": "predicate",
+            "options": [],
+            "version": "1"
+          },
+          {
+            "name": "station",
+            "instructions": "Which synthetic station marker best matches the image? Choose none if there is no red or blue shape.",
+            "kind": "choice",
+            "options": [
+              [
+                "red",
+                "A red geometric shape on white"
+              ],
+              [
+                "blue",
+                "A blue geometric shape on white"
+              ],
+              [
+                "none",
+                "Neither, or unclear"
+              ]
+            ],
+            "version": "1"
+          },
+          {
+            "name": "coverage",
+            "instructions": "How much of the image is occupied by a red shape?",
+            "kind": "score",
+            "options": [
+              [
+                "none",
+                "No red pixels"
+              ],
+              [
+                "some",
+                "Some red, less than half the image"
+              ],
+              [
+                "most",
+                "Red occupies at least half the image"
+              ]
+            ],
+            "version": "1"
+          }
+        ],
+        "batch": {
+          "judgments": [
+            {
+              "question": {
+                "name": "red_visible",
+                "instructions": "Is any clearly red shape visible in the image?",
+                "kind": "predicate",
+                "options": [],
+                "version": "1"
+              },
+              "value": null,
+              "probability": 0.0,
+              "confidence": null,
+              "probabilities": [],
+              "refused": false
+            },
+            {
+              "question": {
+                "name": "station",
+                "instructions": "Which synthetic station marker best matches the image? Choose none if there is no red or blue shape.",
+                "kind": "choice",
+                "options": [
+                  [
+                    "red",
+                    "A red geometric shape on white"
+                  ],
+                  [
+                    "blue",
+                    "A blue geometric shape on white"
+                  ],
+                  [
+                    "none",
+                    "Neither, or unclear"
+                  ]
+                ],
+                "version": "1"
+              },
+              "value": "blue",
+              "probability": null,
+              "confidence": 1.0,
+              "probabilities": [
+                [
+                  "red",
+                  0.0
+                ],
+                [
+                  "blue",
+                  1.0
+                ],
+                [
+                  "none",
+                  0.0
+                ]
+              ],
+              "refused": false
+            },
+            {
+              "question": {
+                "name": "coverage",
+                "instructions": "How much of the image is occupied by a red shape?",
+                "kind": "score",
+                "options": [
+                  [
+                    "none",
+                    "No red pixels"
+                  ],
+                  [
+                    "some",
+                    "Some red, less than half the image"
+                  ],
+                  [
+                    "most",
+                    "Red occupies at least half the image"
+                  ]
+                ],
+                "version": "1"
+              },
+              "value": 0.01,
+              "probability": null,
+              "confidence": 0.99,
+              "probabilities": [
+                [
+                  "none",
+                  0.99
+                ],
+                [
+                  "some",
+                  0.01
+                ],
+                [
+                  "most",
+                  0.0
+                ]
+              ],
+              "refused": false
+            }
+          ],
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "input_tokens": 506,
+          "output_tokens": 0
+        }
+      },
+      "status": "completed",
+      "input_tokens": 506,
+      "output_tokens": 0,
+      "refusals": 0,
+      "prediction": false,
+      "station": "blue",
+      "elapsed_seconds": 0.218898
+    },
+    {
+      "id": "small-red",
+      "expected": {
+        "red_visible": true,
+        "station": "red"
+      },
+      "result": {
+        "kind": "image_inspection",
+        "status": "completed",
+        "evidence": {
+          "id": "sha256:cc4fd883bd4cfee59697ef407db74e27ec4d7cd9212ac37e82ed91210ad0be82",
+          "source": "synthetic:small-red",
+          "acquired_at": "2026-10-22T01:34:32.047050+00:00"
+        },
+        "requested_at": "2026-10-22T01:34:32.047507+00:00",
+        "completed_at": "2026-10-22T01:34:32.235084+00:00",
+        "consumed_at": "2026-10-22T01:34:32.235110+00:00",
+        "max_age_seconds": 5.0,
+        "questions": [
+          {
+            "name": "red_visible",
+            "instructions": "Is any clearly red shape visible in the image?",
+            "kind": "predicate",
+            "options": [],
+            "version": "1"
+          },
+          {
+            "name": "station",
+            "instructions": "Which synthetic station marker best matches the image? Choose none if there is no red or blue shape.",
+            "kind": "choice",
+            "options": [
+              [
+                "red",
+                "A red geometric shape on white"
+              ],
+              [
+                "blue",
+                "A blue geometric shape on white"
+              ],
+              [
+                "none",
+                "Neither, or unclear"
+              ]
+            ],
+            "version": "1"
+          },
+          {
+            "name": "coverage",
+            "instructions": "How much of the image is occupied by a red shape?",
+            "kind": "score",
+            "options": [
+              [
+                "none",
+                "No red pixels"
+              ],
+              [
+                "some",
+                "Some red, less than half the image"
+              ],
+              [
+                "most",
+                "Red occupies at least half the image"
+              ]
+            ],
+            "version": "1"
+          }
+        ],
+        "batch": {
+          "judgments": [
+            {
+              "question": {
+                "name": "red_visible",
+                "instructions": "Is any clearly red shape visible in the image?",
+                "kind": "predicate",
+                "options": [],
+                "version": "1"
+              },
+              "value": null,
+              "probability": 1.0,
+              "confidence": null,
+              "probabilities": [],
+              "refused": false
+            },
+            {
+              "question": {
+                "name": "station",
+                "instructions": "Which synthetic station marker best matches the image? Choose none if there is no red or blue shape.",
+                "kind": "choice",
+                "options": [
+                  [
+                    "red",
+                    "A red geometric shape on white"
+                  ],
+                  [
+                    "blue",
+                    "A blue geometric shape on white"
+                  ],
+                  [
+                    "none",
+                    "Neither, or unclear"
+                  ]
+                ],
+                "version": "1"
+              },
+              "value": "red",
+              "probability": null,
+              "confidence": 1.0,
+              "probabilities": [
+                [
+                  "red",
+                  1.0
+                ],
+                [
+                  "blue",
+                  0.0
+                ],
+                [
+                  "none",
+                  0.0
+                ]
+              ],
+              "refused": false
+            },
+            {
+              "question": {
+                "name": "coverage",
+                "instructions": "How much of the image is occupied by a red shape?",
+                "kind": "score",
+                "options": [
+                  [
+                    "none",
+                    "No red pixels"
+                  ],
+                  [
+                    "some",
+                    "Some red, less than half the image"
+                  ],
+                  [
+                    "most",
+                    "Red occupies at least half the image"
+                  ]
+                ],
+                "version": "1"
+              },
+              "value": 0.99,
+              "probability": null,
+              "confidence": 0.99,
+              "probabilities": [
+                [
+                  "none",
+                  0.01
+                ],
+                [
+                  "some",
+                  0.99
+                ],
+                [
+                  "most",
+                  0.0
+                ]
+              ],
+              "refused": false
+            }
+          ],
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "input_tokens": 506,
+          "output_tokens": 0
+        }
+      },
+      "status": "completed",
+      "input_tokens": 506,
+      "output_tokens": 0,
+      "refusals": 0,
+      "prediction": true,
+      "station": "red",
+      "elapsed_seconds": 0.18825
+    },
+    {
+      "id": "small-blue",
+      "expected": {
+        "red_visible": false,
+        "station": "blue"
+      },
+      "result": {
+        "kind": "image_inspection",
+        "status": "completed",
+        "evidence": {
+          "id": "sha256:7d048e7d6b69678a86b190dc43a615c37fed5e079f6b197ed21d149ec32ff4e4",
+          "source": "synthetic:small-blue",
+          "acquired_at": "2026-10-22T01:34:32.235281+00:00"
+        },
+        "requested_at": "2026-10-22T01:34:32.235628+00:00",
+        "completed_at": "2026-10-22T01:34:32.703084+00:00",
+        "consumed_at": "2026-10-22T01:34:32.703105+00:00",
+        "max_age_seconds": 5.0,
+        "questions": [
+          {
+            "name": "red_visible",
+            "instructions": "Is any clearly red shape visible in the image?",
+            "kind": "predicate",
+            "options": [],
+            "version": "1"
+          },
+          {
+            "name": "station",
+            "instructions": "Which synthetic station marker best matches the image? Choose none if there is no red or blue shape.",
+            "kind": "choice",
+            "options": [
+              [
+                "red",
+                "A red geometric shape on white"
+              ],
+              [
+                "blue",
+                "A blue geometric shape on white"
+              ],
+              [
+                "none",
+                "Neither, or unclear"
+              ]
+            ],
+            "version": "1"
+          },
+          {
+            "name": "coverage",
+            "instructions": "How much of the image is occupied by a red shape?",
+            "kind": "score",
+            "options": [
+              [
+                "none",
+                "No red pixels"
+              ],
+              [
+                "some",
+                "Some red, less than half the image"
+              ],
+              [
+                "most",
+                "Red occupies at least half the image"
+              ]
+            ],
+            "version": "1"
+          }
+        ],
+        "batch": {
+          "judgments": [
+            {
+              "question": {
+                "name": "red_visible",
+                "instructions": "Is any clearly red shape visible in the image?",
+                "kind": "predicate",
+                "options": [],
+                "version": "1"
+              },
+              "value": null,
+              "probability": 0.0,
+              "confidence": null,
+              "probabilities": [],
+              "refused": false
+            },
+            {
+              "question": {
+                "name": "station",
+                "instructions": "Which synthetic station marker best matches the image? Choose none if there is no red or blue shape.",
+                "kind": "choice",
+                "options": [
+                  [
+                    "red",
+                    "A red geometric shape on white"
+                  ],
+                  [
+                    "blue",
+                    "A blue geometric shape on white"
+                  ],
+                  [
+                    "none",
+                    "Neither, or unclear"
+                  ]
+                ],
+                "version": "1"
+              },
+              "value": "blue",
+              "probability": null,
+              "confidence": 0.99,
+              "probabilities": [
+                [
+                  "red",
+                  0.0
+                ],
+                [
+                  "blue",
+                  0.99
+                ],
+                [
+                  "none",
+                  0.01
+                ]
+              ],
+              "refused": false
+            },
+            {
+              "question": {
+                "name": "coverage",
+                "instructions": "How much of the image is occupied by a red shape?",
+                "kind": "score",
+                "options": [
+                  [
+                    "none",
+                    "No red pixels"
+                  ],
+                  [
+                    "some",
+                    "Some red, less than half the image"
+                  ],
+                  [
+                    "most",
+                    "Red occupies at least half the image"
+                  ]
+                ],
+                "version": "1"
+              },
+              "value": 0.01,
+              "probability": null,
+              "confidence": 0.99,
+              "probabilities": [
+                [
+                  "none",
+                  0.99
+                ],
+                [
+                  "some",
+                  0.01
+                ],
+                [
+                  "most",
+                  0.0
+                ]
+              ],
+              "refused": false
+            }
+          ],
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "input_tokens": 506,
+          "output_tokens": 0
+        }
+      },
+      "status": "completed",
+      "input_tokens": 506,
+      "output_tokens": 0,
+      "refusals": 0,
+      "prediction": false,
+      "station": "blue",
+      "elapsed_seconds": 0.467973
+    },
+    {
+      "id": "gray-square",
+      "expected": {
+        "red_visible": false,
+        "station": "none"
+      },
+      "result": {
+        "kind": "image_inspection",
+        "status": "completed",
+        "evidence": {
+          "id": "sha256:34bff28c1521fb70d50e9ce8998c08d9e239ed346d6ca3928b5cb9313436e679",
+          "source": "synthetic:gray-square",
+          "acquired_at": "2026-10-22T01:34:32.703269+00:00"
+        },
+        "requested_at": "2026-10-22T01:34:32.703561+00:00",
+        "completed_at": "2026-10-22T01:34:33.010700+00:00",
+        "consumed_at": "2026-10-22T01:34:33.010726+00:00",
+        "max_age_seconds": 5.0,
+        "questions": [
+          {
+            "name": "red_visible",
+            "instructions": "Is any clearly red shape visible in the image?",
+            "kind": "predicate",
+            "options": [],
+            "version": "1"
+          },
+          {
+            "name": "station",
+            "instructions": "Which synthetic station marker best matches the image? Choose none if there is no red or blue shape.",
+            "kind": "choice",
+            "options": [
+              [
+                "red",
+                "A red geometric shape on white"
+              ],
+              [
+                "blue",
+                "A blue geometric shape on white"
+              ],
+              [
+                "none",
+                "Neither, or unclear"
+              ]
+            ],
+            "version": "1"
+          },
+          {
+            "name": "coverage",
+            "instructions": "How much of the image is occupied by a red shape?",
+            "kind": "score",
+            "options": [
+              [
+                "none",
+                "No red pixels"
+              ],
+              [
+                "some",
+                "Some red, less than half the image"
+              ],
+              [
+                "most",
+                "Red occupies at least half the image"
+              ]
+            ],
+            "version": "1"
+          }
+        ],
+        "batch": {
+          "judgments": [
+            {
+              "question": {
+                "name": "red_visible",
+                "instructions": "Is any clearly red shape visible in the image?",
+                "kind": "predicate",
+                "options": [],
+                "version": "1"
+              },
+              "value": null,
+              "probability": 0.0,
+              "confidence": null,
+              "probabilities": [],
+              "refused": false
+            },
+            {
+              "question": {
+                "name": "station",
+                "instructions": "Which synthetic station marker best matches the image? Choose none if there is no red or blue shape.",
+                "kind": "choice",
+                "options": [
+                  [
+                    "red",
+                    "A red geometric shape on white"
+                  ],
+                  [
+                    "blue",
+                    "A blue geometric shape on white"
+                  ],
+                  [
+                    "none",
+                    "Neither, or unclear"
+                  ]
+                ],
+                "version": "1"
+              },
+              "value": "none",
+              "probability": null,
+              "confidence": 1.0,
+              "probabilities": [
+                [
+                  "red",
+                  0.0
+                ],
+                [
+                  "blue",
+                  0.0
+                ],
+                [
+                  "none",
+                  1.0
+                ]
+              ],
+              "refused": false
+            },
+            {
+              "question": {
+                "name": "coverage",
+                "instructions": "How much of the image is occupied by a red shape?",
+                "kind": "score",
+                "options": [
+                  [
+                    "none",
+                    "No red pixels"
+                  ],
+                  [
+                    "some",
+                    "Some red, less than half the image"
+                  ],
+                  [
+                    "most",
+                    "Red occupies at least half the image"
+                  ]
+                ],
+                "version": "1"
+              },
+              "value": 0.02,
+              "probability": null,
+              "confidence": 0.97,
+              "probabilities": [
+                [
+                  "none",
+                  0.98
+                ],
+                [
+                  "some",
+                  0.02
+                ],
+                [
+                  "most",
+                  0.0
+                ]
+              ],
+              "refused": false
+            }
+          ],
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "input_tokens": 506,
+          "output_tokens": 0
+        }
+      },
+      "status": "completed",
+      "input_tokens": 506,
+      "output_tokens": 0,
+      "refusals": 0,
+      "prediction": false,
+      "station": "none",
+      "elapsed_seconds": 0.307632
+    },
+    {
+      "id": "empty",
+      "expected": {
+        "red_visible": false,
+        "station": "none"
+      },
+      "result": {
+        "kind": "image_inspection",
+        "status": "completed",
+        "evidence": {
+          "id": "sha256:e958e1472b07d135aa86aa529a2755e7b16d4a62363b32042197d3e7ca9c9c60",
+          "source": "synthetic:empty",
+          "acquired_at": "2026-10-22T01:34:33.010900+00:00"
+        },
+        "requested_at": "2026-10-22T01:34:33.011231+00:00",
+        "completed_at": "2026-10-22T01:34:33.318299+00:00",
+        "consumed_at": "2026-10-22T01:34:33.318329+00:00",
+        "max_age_seconds": 5.0,
+        "questions": [
+          {
+            "name": "red_visible",
+            "instructions": "Is any clearly red shape visible in the image?",
+            "kind": "predicate",
+            "options": [],
+            "version": "1"
+          },
+          {
+            "name": "station",
+            "instructions": "Which synthetic station marker best matches the image? Choose none if there is no red or blue shape.",
+            "kind": "choice",
+            "options": [
+              [
+                "red",
+                "A red geometric shape on white"
+              ],
+              [
+                "blue",
+                "A blue geometric shape on white"
+              ],
+              [
+                "none",
+                "Neither, or unclear"
+              ]
+            ],
+            "version": "1"
+          },
+          {
+            "name": "coverage",
+            "instructions": "How much of the image is occupied by a red shape?",
+            "kind": "score",
+            "options": [
+              [
+                "none",
+                "No red pixels"
+              ],
+              [
+                "some",
+                "Some red, less than half the image"
+              ],
+              [
+                "most",
+                "Red occupies at least half the image"
+              ]
+            ],
+            "version": "1"
+          }
+        ],
+        "batch": {
+          "judgments": [
+            {
+              "question": {
+                "name": "red_visible",
+                "instructions": "Is any clearly red shape visible in the image?",
+                "kind": "predicate",
+                "options": [],
+                "version": "1"
+              },
+              "value": null,
+              "probability": 0.0,
+              "confidence": null,
+              "probabilities": [],
+              "refused": false
+            },
+            {
+              "question": {
+                "name": "station",
+                "instructions": "Which synthetic station marker best matches the image? Choose none if there is no red or blue shape.",
+                "kind": "choice",
+                "options": [
+                  [
+                    "red",
+                    "A red geometric shape on white"
+                  ],
+                  [
+                    "blue",
+                    "A blue geometric shape on white"
+                  ],
+                  [
+                    "none",
+                    "Neither, or unclear"
+                  ]
+                ],
+                "version": "1"
+              },
+              "value": "none",
+              "probability": null,
+              "confidence": 1.0,
+              "probabilities": [
+                [
+                  "red",
+                  0.0
+                ],
+                [
+                  "blue",
+                  0.0
+                ],
+                [
+                  "none",
+                  1.0
+                ]
+              ],
+              "refused": false
+            },
+            {
+              "question": {
+                "name": "coverage",
+                "instructions": "How much of the image is occupied by a red shape?",
+                "kind": "score",
+                "options": [
+                  [
+                    "none",
+                    "No red pixels"
+                  ],
+                  [
+                    "some",
+                    "Some red, less than half the image"
+                  ],
+                  [
+                    "most",
+                    "Red occupies at least half the image"
+                  ]
+                ],
+                "version": "1"
+              },
+              "value": 0.01,
+              "probability": null,
+              "confidence": 0.99,
+              "probabilities": [
+                [
+                  "none",
+                  0.99
+                ],
+                [
+                  "some",
+                  0.01
+                ],
+                [
+                  "most",
+                  0.0
+                ]
+              ],
+              "refused": false
+            }
+          ],
+          "provider": "openai",
+          "model": "gpt-6-luna",
+          "input_tokens": 506,
+          "output_tokens": 0
+        }
+      },
+      "status": "completed",
+      "input_tokens": 506,
+      "output_tokens": 0,
+      "refusals": 0,
+      "prediction": false,
+      "station": "none",
+      "elapsed_seconds": 0.307627
+    }
+  ],
+  "recorded_at": "2026-10-22T01:34:33.319676+00:00",
+  "requested_model": "gpt-6-luna",
+  "evidence": "Synthetic shapes; no hardware or real station recognition",
+  "actual_billed_cost_usd": null
+}

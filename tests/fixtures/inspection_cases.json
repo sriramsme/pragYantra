@@ -1,0 +1,10 @@
+[
+  {"id":"red-square","shape":"square","color":"red","size":160,"red_visible":true,"station":"red"},
+  {"id":"blue-square","shape":"square","color":"blue","size":160,"red_visible":false,"station":"blue"},
+  {"id":"red-circle","shape":"circle","color":"red","size":130,"red_visible":true,"station":"red"},
+  {"id":"blue-circle","shape":"circle","color":"blue","size":130,"red_visible":false,"station":"blue"},
+  {"id":"small-red","shape":"square","color":"red","size":25,"red_visible":true,"station":"red"},
+  {"id":"small-blue","shape":"circle","color":"blue","size":25,"red_visible":false,"station":"blue"},
+  {"id":"gray-square","shape":"square","color":"gray","size":160,"red_visible":false,"station":"none"},
+  {"id":"empty","shape":"square","color":"white","size":160,"red_visible":false,"station":"none"}
+]

@@ -13,6 +13,7 @@ from pragyantra.application.memory import (
     search_terms,
     validate_search,
 )
+from pragyantra.providers.companion import SQLiteCompanion
 
 
 class SQLiteNotes:
@@ -36,7 +37,7 @@ class SQLiteNotes:
             if application != 0x50524759 and (application != 0 or tables):
                 raise ValueError("This is not a PragYantra memory database")
             version = db.execute("PRAGMA user_version").fetchone()[0]
-            if version not in (0, 1, 2):
+            if version not in (0, 1, 2, 3):
                 raise ValueError("Unsupported memory schema version")
             db.executescript("""
                 CREATE TABLE IF NOT EXISTS notes (
@@ -45,6 +46,10 @@ class SQLiteNotes:
                 );
                 CREATE VIRTUAL TABLE IF NOT EXISTS notes_fts USING fts5(
                     text, content='notes', content_rowid='id'
+                );
+                CREATE TABLE IF NOT EXISTS companion_context (
+                    kind TEXT NOT NULL, key TEXT NOT NULL, value TEXT NOT NULL,
+                    updated_at TEXT NOT NULL, PRIMARY KEY(kind,key)
                 );
                 CREATE TRIGGER IF NOT EXISTS notes_insert AFTER INSERT ON notes BEGIN
                     INSERT INTO notes_fts(rowid,text) VALUES(new.id,new.text);
@@ -62,7 +67,7 @@ class SQLiteNotes:
                     db.execute("ALTER TABLE notes ADD COLUMN embedding_json TEXT")
                 if version < 2:
                     db.execute("INSERT INTO notes_fts(notes_fts) VALUES('rebuild')")
-                db.execute("PRAGMA user_version = 2")
+                db.execute("PRAGMA user_version = 3")
             self._db = db
             return self
         except BaseException:
@@ -73,6 +78,10 @@ class SQLiteNotes:
         if self._db is None:
             raise ValueError("Memory repository is not open")
         return self._db
+
+    @property
+    def companion(self) -> SQLiteCompanion:
+        return SQLiteCompanion(self._connection)
 
     @staticmethod
     def _note(row) -> MemoryNote:

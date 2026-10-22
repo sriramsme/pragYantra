@@ -8,6 +8,8 @@ The assistant can converse using typed text or transcribed audio, use background
 webcam descriptions and timestamped sensor readings as context, and synthesize
 spoken replies. Explicit notes support persistent keyword recall and optional
 semantic recall. Calculations and memory commands run in application code.
+Explicit names/preferences supplement notes, and direct image inspections return
+bounded predicates, choices or scores independently of generated conversation.
 
 The software has automated integration/lifecycle tests and live hosted-service
 smoke checks. Microphone/speaker operation and Raspberry Pi deployment still need
@@ -96,6 +98,31 @@ independently of conversation, with one pending camera frame and serial vision
 requests. Selected frames are uploaded to OpenAI. See [vision](docs/vision.md),
 [webcam lifecycle](docs/webcam.md), and [temporal context](docs/temporal-context.md).
 
+## Inspect image evidence directly
+
+```bash
+prag inspect photo.jpg --condition 'Is a red mug visible?' --json
+prag inspect --camera --condition 'Is the configured marker visible?' --json
+```
+
+This uses the separate OpenAI Decisions endpoint (`gpt-6-luna`), preserving the
+existing conversation/description model. It returns model judgments with evidence
+references, acquisition times and uncertainty, rejecting stale evidence. Multiple
+conditions share one image request. Named station choices and ordered rubrics use
+`--questions FILE`; see [direct inspection](docs/inspection.md).
+
+## Save companion context
+
+```bash
+prag profile set name user Casey
+prag profile set preference interaction_style 'Keep replies concise'
+prag chat --memory
+```
+
+These explicit entries persist alongside notes when the same database is selected.
+Named observations remain saved text, separate from what sensors currently show.
+See [companion context](docs/companion.md) for `/profile` commands and limits.
+
 ## Hear and speak
 
 File-based audio needs no audio-device dependency:
@@ -179,8 +206,10 @@ uv build
 Normal tests use synthetic frames/audio, fake devices, temporary databases, and
 mock HTTP transports. They require no keys, paid calls, downloads, or physical
 hardware. See [the test map](tests/README.md). Hosted providers are replaceable
-through small protocols. TypeSafe request interpretation is opt in; local inference
-and direct image-decision providers are not implemented yet.
+through small protocols. TypeSafe request interpretation is opt in; direct image
+judgments use OpenAI Decisions. Local inference remains unimplemented. Explicit
+evaluation scripts default to offline fixture validation; select `--live` to call
+providers. See [inspection evaluation](docs/inspection.md#evaluation-and-limits).
 
 ## License
 

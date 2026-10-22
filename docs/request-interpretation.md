@@ -71,8 +71,8 @@ An inspection reads existing scene evidence **after** interpretation completes,
 so Jev latency counts toward freshness. It does not capture a new frame, answer an
 arbitrary visual question or judge an image directly. Without background vision or
 host-supplied visual evidence, the result is unavailable. This is separate from
-the planned direct image judgments in Phase C. Inspection does not add a synthetic
-conversation exchange or touch event.
+the separate [direct image judgments](inspection.md) in Phase C. Inspection does
+not add a synthetic conversation exchange or touch event.
 
 ## Failure, provenance and control
 

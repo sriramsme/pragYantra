@@ -8,6 +8,10 @@ from enum import StrEnum
 MAX_PREVIOUS_DESCRIPTION_CHARS = 1000
 
 
+def is_probability(value: float) -> bool:
+    return type(value) in (int, float) and 0 <= value <= 1 and math.isfinite(value)
+
+
 def require_aware(value: datetime, name: str) -> None:
     """Reject ambiguous timestamps rather than guessing their timezone."""
     if value.tzinfo is None or value.utcoffset() is None:

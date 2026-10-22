@@ -63,10 +63,12 @@ without a route. Broader independent evaluation remains outstanding.
 
 ## C — Direct inspection judgments
 
-**Planned:** target visibility, named-station matching and specific inspection
-conditions over image evidence. OpenAI's
+**Implemented:** explicit target/condition predicates, named-station choices and
+ordered scores directly over images, exposed through `ImageInspector` and
+`prag inspect`. OpenAI's
 [Decisions documentation](https://developers.openai.com/api/docs/guides/decisions)
-is a candidate provider reference; no direct image-decision provider is integrated yet.
+defines the integrated provider contract. No conversation caption is used as a
+substitute for pixels. See [inspection](inspection.md).
 
 Measurements, model judgments and generated descriptions remain distinct values.
 Judgments need evidence references, acquisition/completion times, question/criteria
@@ -77,24 +79,42 @@ channels must not silently hold inferred facts.
 Completion criterion: stale results can be rejected and image judgments can be
 evaluated independently of conversational wording.
 
+Tests establish pre-call, post-call and delayed-consumption stale rejection, future
+evidence rejection, refusal/invalid/error handling and SDK payload/cleanup. The
+[live eight-image check](experiments/2026-10-21-direct-inspection.md) exercised all
+three question types with synthetic shapes; real station/object accuracy remains
+unmeasured. Conversational `inspect` retains its existing latest-caption behavior;
+configured direct questions use the separate command/library API.
+
 ## D — Companion context
 
-**Partly available:** explicit notes already persist through SQLite with optional
-semantic recall. Structured names/preferences, interaction style and named
-observations remain future behavior. Station coordinates, routes and robot
-calibration belong in Rover. Add a separate reference-image artifact mechanism
+**Implemented:** explicit notes plus bounded names/preferences and named
+observations, using opt-in SQLite persistence in chat. `profile` and `/profile`
+provide deterministic set/list/delete operations; conversation receives a separate
+saved-context snapshot. See [companion context](companion.md).
+Station coordinates, routes and robot calibration belong in Rover. Add a separate
+reference-image artifact mechanism
 only when a comparison feature requires it.
 
 Completion criterion: explicit personalization survives restart and remains
 separate from current sensory evidence.
+
+Cross-process tests and a [synthetic live interaction](experiments/2026-10-21-companion.md)
+verify persistence and use of the saved name. Current visual/scalar evidence stays
+independent. No image-comparison feature was introduced, so no artifact store is
+needed for this milestone.
 
 ## E — Evaluation throughout
 
 **Existing foundation:** normal tests use fake providers, synthetic images/audio,
 logical clocks and guarded device/network access. Live hosted smoke checks are
 recorded separately. A curated text fixture and explicit live Jev evaluation
-script accompany B; direct-image evaluation remains planned alongside C. See the
+script accompany B; an eight-image synthetic fixture/script accompanies C. See the
 [first request experiment](experiments/2026-10-21-request-interpretation.md).
+Inspection reports false positives/negatives, decision coverage, station matches,
+refusals/failures/stale results, median/p95 latency and usage. Optional supplied
+rates estimate cost for reported usage; the live inspection write-up also records
+a base-rate estimate per batch, with billing and hardware timing limits explicit.
 
 Build representative text cases and recorded/synthetic image fixtures. Include
 negation, quoted/hypothetical commands, missing targets and compound requests.
@@ -107,3 +127,17 @@ Batch independent questions when useful; dependent questions may need later
 requests and new evidence. Do not run every judgment for every observation.
 Normal tests remain credential-free; live provider evaluations must be selected
 explicitly and record inputs, settings, outcomes and limits.
+
+## Current boundary
+
+The A–E software foundation is implemented and locally validated. Continuing
+evaluation on real observations is ongoing engineering work, not evidence of a
+finished robot. Following, mission execution, physical transport and typed rover
+behavior requests require concrete rover interfaces and remain outside this
+foundation. No hardware target or reference-image comparison feature was selected.
+
+Validation on October 21, 2026: 301 automated tests passed with all extras, including
+against the built wheel outside the checkout; the base wheel passed 275 with two
+optional modules skipped. Ruff, package build, CLI/demo and offline example checks
+passed. See the [test map](../tests/README.md). These are local software checks;
+there is no CI workflow or new physical-device validation.

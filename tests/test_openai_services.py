@@ -223,3 +223,34 @@ def test_malformed_completed_conversation_is_provider_error(monkeypatch):
                 await provider.respond(request())
 
     asyncio.run(scenario())
+
+
+def test_saved_companion_context_is_distinct_from_current_evidence(monkeypatch):
+    from dataclasses import replace
+
+    from pragyantra.application.companion import CompanionEntry, ContextKind
+
+    def handler(http_request):
+        body = json.loads(http_request.content)
+        record = json.loads(body["input"][-2]["content"].split("\n", 1)[1])
+        assert record["companion"][0]["value"] == "Casey"
+        assert record["companion"][1]["value"] == "A desk near a window"
+        assert record["environment"]["visual"] is None
+        assert "never current sensor facts" in body["instructions"]
+        return httpx2.Response(200, json=response("Hi Casey."))
+
+    async def scenario():
+        async with services(monkeypatch, handler) as provider:
+            await provider.respond(
+                replace(
+                    request(),
+                    companion=(
+                        CompanionEntry(ContextKind.NAME, "user", "Casey", AT),
+                        CompanionEntry(
+                            ContextKind.OBSERVATION, "desk", "A desk near a window", AT
+                        ),
+                    ),
+                )
+            )
+
+    asyncio.run(scenario())

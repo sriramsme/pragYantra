@@ -32,6 +32,8 @@ local providers may implement the same relevant contracts later.
 flowchart LR
   camera[Camera / image file] --> frame[ImageFrame]
   frame --> vision[VisionProvider]
+  frame -->|explicit configured questions| direct[ImageInspector / Decisions]
+  direct --> stdout
   vision --> world[WorldState]
   sensors[Typed sensor events] --> world
   microphone[Microphone / WAV] --> clip[AudioClip]
@@ -49,6 +51,7 @@ flowchart LR
   snapshot --> session
   history[Bounded conversation history] --> session
   notes[NoteRepository] --> session
+  companion[Explicit companion context] --> session
   session --> commands[Deterministic commands]
   session --> conversation[ConversationProvider]
   conversation --> reply[GeneratedReply]
@@ -74,6 +77,8 @@ SDK objects stay inside providers.
 | `application/perception.py`, `observation_loop.py` | Interpret frames, preserve timestamps, pace serial vision, select optional prior context |
 | `application/runner.py` | Reusable typed input/result handling, initial vision readiness and task supervision |
 | `application/requests.py` | Bounded intent values, uncertainty/capability rules and optional request routing |
+| `application/inspection.py` | Direct image judgments with evidence references, acquisition age and consumption checks |
+| `application/companion.py` | Explicit saved names/preferences/observations, independent of sensor state |
 | `application/conversation.py` | Serialize turns; combine sensory snapshot, notes and history; dispatch explicit commands |
 | `application/memory.py` | Notes, embedding contract/cosine retrieval and bounded complete exchanges |
 | `application/actions.py` | Numeric AST interpreter with explicit operators/functions/bounds |
@@ -85,8 +90,10 @@ SDK objects stay inside providers.
 | `providers/openai.py`, `openai_services.py` | Vision, conversation, ASR, synthesis, optional embeddings; deadlines/errors/parsing |
 | `providers/memory.py` | Owned SQLite connection, schema/index, bounded persistence/retrieval |
 | `providers/typesafe.py` | Optional Jev intent selection; SDK call, validation, deadlines and errors |
+| `providers/openai_decisions.py` | Batched image predicates/choices/scores; response validation and refusals |
+| `providers/companion.py` | Context entries sharing the note database's owned connection |
 | `cli/__init__.py`, `configure.py` | Launcher, argument definitions and validation |
-| `cli/assistant.py`, `audio.py`, `vision.py`, `memory.py` | Startup composition for each command family |
+| `cli/assistant.py`, `audio.py`, `vision.py`, `inspection.py`, `memory.py` | Startup composition for each command family |
 
 ## State and timing
 
@@ -169,8 +176,16 @@ its snapshot after interpretation, including that delay in evidence age. Invalid
 or failed judgments emit a typed failure with no fallback; the stream can continue.
 Exact `/stop` ends only the local runner, with no priority or physical stop
 guarantee. See [request interpretation](request-interpretation.md). OpenAI Decisions
-and executable robot behavior requests remain planned. Known calculations and
-device limits belong in code.
+now supplies a separate explicit [direct inspection](inspection.md) path; it does
+not run automatically for each frame or replace scalar measurements. Its dedicated
+documented default is `gpt-6-luna`; other OpenAI defaults stay unchanged. Known
+calculations and device limits belong in code. Executable robot requests remain
+dependent on concrete rover interfaces.
+
+Saved [companion context](companion.md) is separate from the environment snapshot
+and keyword/semantic notes. Conversation receives at most 32 explicit entries,
+with update times and exact context retained in result JSON. SQLite schema 3 adds
+context storage without changing existing note IDs/text/embeddings.
 
 ## Physical integration and evidence limits
 
@@ -193,5 +208,6 @@ checks or removing obsolete code.
 
 See [the implementation roadmap](roadmap.md) for bounded request interpretation,
 direct inspection judgments, companion context and evaluation. The reusable runner
-and optional Jev request interpretation are implemented; direct image judgments
-and typed robot behavior requests remain planned.
+and optional Jev request interpretation, direct image judgments and saved companion
+context are implemented. Typed robot behavior requests remain planned for a
+concrete rover interface.

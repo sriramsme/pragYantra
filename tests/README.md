@@ -39,7 +39,8 @@ managed through `uv`. Async tests use the
 standard-library event loop; no additional async test plugin is needed.
 
 Provider/device integration tests must be explicitly selected and document their
-setup and any API costs. No live integration tests exist yet. SDK contract tests
+setup and any API costs. Live checks use explicitly selected example scripts
+outside pytest. SDK contract tests
 make no network calls. Test collection is scoped to `tests/`,
 without collecting historical code.
 
@@ -90,3 +91,16 @@ an automatically executed test or evidence of physical audio-device performance.
 with `uv run examples/evaluate_intents.py`; only explicit `--live` calls TypeSafe.
 See [the live experiment](../docs/experiments/2026-10-21-request-interpretation.md).
 Fake-provider tests establish handling rules, not Jev accuracy.
+
+- `test_inspection.py`: independent image judgment types, strict distributions,
+  pre-call/post-call/consumption freshness, evidence provenance, errors/cancellation.
+- `test_openai_decisions.py`: actual SDK over mock HTTP, batched predicate/choice/
+  score payloads, malformed/refused responses, no retries, timeouts and cleanup.
+- `test_inspection_cli.py`: normalized synthetic image input, question-file
+  validation and failure before device acquisition.
+- `test_companion.py`: bounded in-memory/SQLite context, update/delete, old-update
+  rejection, schema-2 migration, resource lifetime and cross-process persistence.
+  Conversation provider tests verify saved context stays distinct from sensors.
+- `test_evaluation.py`: offline image-fixture validation and error/coverage/latency/
+  cost calculations with synthetic records. `evaluate_inspections.py --live` is
+  deliberately outside normal test execution; see [the log](../docs/experiments/2026-10-21-direct-inspection.md).

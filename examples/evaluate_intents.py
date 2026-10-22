@@ -110,8 +110,12 @@ def main():
     parser.add_argument("--limit", type=int, default=100)
     parser.add_argument("--model", default="jev-1.14.0")
     parser.add_argument("--timeout", type=float, default=10)
+    parser.add_argument("--input-usd-per-million", type=float)
     args = parser.parse_args()
     try:
+        rate = args.input_usd_per_million
+        if rate is not None and (not math.isfinite(rate) or rate < 0):
+            raise ValueError("Input token rate must be finite and nonnegative")
         cases = load_cases(args.cases, args.limit)
         if not args.live:
             print(
@@ -122,9 +126,14 @@ def main():
         from dotenv import load_dotenv
 
         load_dotenv(dotenv_path=Path.cwd() / ".env", override=False)
-        print(
-            json.dumps(asyncio.run(evaluate(cases, args.model, args.timeout)), indent=2)
+        report = asyncio.run(evaluate(cases, args.model, args.timeout))
+        report["assumed_input_usd_per_million"] = rate
+        report["estimated_usd_for_reported_input"] = (
+            report["reported_input_tokens"] * rate / 1_000_000
+            if rate is not None
+            else None
         )
+        print(json.dumps(report, indent=2))
     except (ValueError, OSError, ProviderError) as error:
         parser.exit(1, f"Evaluation failed: {error}\n")
 
