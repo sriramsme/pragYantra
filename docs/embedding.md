@@ -50,6 +50,8 @@ is optional; supply both `image_source` and `vision`, or omit both.
 | Input value | Handling / result |
 | --- | --- |
 | `TextObservation` | Conversation or an existing explicit command → `ConversationResult` |
+| `TextObservation` with optional `router` | Natural request → `RequestResult`; slash commands bypass routing |
+| Exact `/stop` text | Emit stopped `RequestResult`, then end the run |
 | `SensorObservation` | Update the latest scalar channel; no emitted result |
 | `VisualObservation` | Update already-interpreted scene evidence; no emitted result |
 | `TouchObservation` | Apply the freshness policy → `ContextResponse` |
@@ -58,6 +60,13 @@ Results are typed Python values. The host decides whether to display, serialize,
 persist, synthesize or transmit them. The runner does not keep a result history
 or output queue. Awaited output applies backpressure to foreground input. If an
 output callback plays speech, the next input is not requested until it finishes.
+
+For opt-in interpretation, open a `RequestInterpreter` provider in the host, wrap
+it with `RequestRouter`, and pass `router=router` to `AssistantRunner`. Keep that
+context open until `run` finishes. The application router depends only on the
+protocol; see [request interpretation](request-interpretation.md). It reports
+invalid/service judgments as typed results and can accept the next observation.
+With injected clocks, supply the same clock to the router, session and runner.
 
 ## Ownership and shutdown
 
@@ -112,7 +121,7 @@ existing half-duplex implementation without changing audio behavior.
 
 A rover gateway can supply an `ImageSource`, translate telemetry into observations,
 and receive typed results. This milestone adds no network camera transport,
-mission execution, decision-model routing, priority stop channel, actuator access,
+mission execution, priority stop channel, actuator access,
 or hard real-time guarantees. Foreground sensor events still wait behind busy
 turns/output. Rover motion supervision and stopping must be independent of this
 conversational stream. See the [implementation roadmap](roadmap.md).

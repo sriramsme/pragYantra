@@ -68,7 +68,7 @@ an automatically executed test or evidence of physical audio-device performance.
 - `test_cli_environment.py`: installed executable aliases, dotenv scope/precedence,
   alternate/no env files, lightweight help, camera/memory defaults and audio mode
   selection with fake handlers. `conftest.py` blocks real sockets and audio devices,
-  disables project dotenv loading and removes the ambient API key for normal tests;
+  disables project dotenv loading and removes ambient OpenAI/TypeSafe keys for normal tests;
   configuration tests explicitly enable only temporary env fixtures.
 
 - `test_assistant_runner.py`: programmatic typed observations/results, initial
@@ -76,3 +76,17 @@ an automatically executed test or evidence of physical audio-device performance.
   output backpressure, caller-owned resources, input iterator cleanup, startup and
   mid-turn failure, cancellation, simultaneous errors and sequential reuse. The
   runnable embedding example is also checked without credentials or hardware.
+
+- `test_request_interpretation.py`: typed judgments, uncertainty/capability rules,
+  post-interpretation scene freshness, no fallback/history on failure, slash-command
+  bypass, local `/stop` stream cleanup and cancellation using fake judgments.
+- `test_typesafe_provider.py`: real optional SDK over mock HTTP; payload/provenance,
+  invalid/missing answers, sanitized errors, no retries, timeout/cancellation and
+  client cleanup. Run with `--extra decisions`; base tests skip this module.
+- `test_request_cli.py`: standalone judgments without OpenAI construction, opt-in
+  chat routing, result JSON, shutdown and credential-free evaluation fixture loading.
+
+`fixtures/intent_requests.json` contains curated synthetic cases. Validate them
+with `uv run examples/evaluate_intents.py`; only explicit `--live` calls TypeSafe.
+See [the live experiment](../docs/experiments/2026-10-21-request-interpretation.md).
+Fake-provider tests establish handling rules, not Jev accuracy.

@@ -12,7 +12,7 @@ commands, and optional spoken output. The original 2024 prototype has a document
 | `application/` | Typed values/protocols, state, policies, conversation and lifecycle | Other application modules |
 | `inputs/` | Console, files, cameras, microphone capture, endpointing, event parsing | Application values/interfaces |
 | `outputs/` | PCM playback, WAV artifacts, simulated output | Application values/interfaces |
-| `providers/` | OpenAI services and SQLite persistence | Application values/interfaces |
+| `providers/` | OpenAI services, optional TypeSafe judgments, SQLite persistence | Application values/interfaces |
 | `cli/` | Arguments, configuration, construction, task/resource ownership | All four packages |
 
 Application code never imports concrete inputs, outputs, providers, SDKs, hardware
@@ -38,7 +38,13 @@ flowchart LR
   clip --> asr[TranscriptionProvider]
   asr --> text[TextObservation]
   console[Console / text event] --> text
-  text --> session[ConversationSession]
+  text --> runner[AssistantRunner]
+  runner -->|commands or routing disabled| session[ConversationSession]
+  runner -->|routing enabled| router[RequestRouter / Jev intent]
+  router -->|conversation| session
+  router --> inspection[Latest scene / explicit handling result]
+  world --> inspection
+  inspection --> stdout
   world --> snapshot[EnvironmentSnapshot]
   snapshot --> session
   history[Bounded conversation history] --> session
@@ -67,6 +73,7 @@ SDK objects stay inside providers.
 | `application/world_state.py` | Latest acquired visual scene and bounded scalar channels; frozen evidence snapshots |
 | `application/perception.py`, `observation_loop.py` | Interpret frames, preserve timestamps, pace serial vision, select optional prior context |
 | `application/runner.py` | Reusable typed input/result handling, initial vision readiness and task supervision |
+| `application/requests.py` | Bounded intent values, uncertainty/capability rules and optional request routing |
 | `application/conversation.py` | Serialize turns; combine sensory snapshot, notes and history; dispatch explicit commands |
 | `application/memory.py` | Notes, embedding contract/cosine retrieval and bounded complete exchanges |
 | `application/actions.py` | Numeric AST interpreter with explicit operators/functions/bounds |
@@ -77,6 +84,7 @@ SDK objects stay inside providers.
 | `outputs/audio.py`, `simulated.py` | Owned audio playback/artifacts and recorded simulation responses |
 | `providers/openai.py`, `openai_services.py` | Vision, conversation, ASR, synthesis, optional embeddings; deadlines/errors/parsing |
 | `providers/memory.py` | Owned SQLite connection, schema/index, bounded persistence/retrieval |
+| `providers/typesafe.py` | Optional Jev intent selection; SDK call, validation, deadlines and errors |
 | `cli/__init__.py`, `configure.py` | Launcher, argument definitions and validation |
 | `cli/assistant.py`, `audio.py`, `vision.py`, `memory.py` | Startup composition for each command family |
 
@@ -154,10 +162,15 @@ help/global options. See [CLI usage](cli.md) for the `prag` alias and device def
 
 Explicit `/commands` implement known rules/calculations and note operations.
 Conversation has no tool/actuator access; generated text is never executed.
-Untrusted context/notes are labeled as data. Decision models can be added for a
-specific bounded judgment with evaluation; neither Jev nor OpenAI Decisions is
-integrated. There is no justification for substituting inference for a numeric
-calculation or a device limit.
+Untrusted context/notes are labeled as data. Optional Jev request interpretation
+(`jev-1.14.0`) supplies a typed judgment; application rules only allow conversation
+or reporting an existing scene. Slash commands bypass inference. Inspection takes
+its snapshot after interpretation, including that delay in evidence age. Invalid
+or failed judgments emit a typed failure with no fallback; the stream can continue.
+Exact `/stop` ends only the local runner, with no priority or physical stop
+guarantee. See [request interpretation](request-interpretation.md). OpenAI Decisions
+and executable robot behavior requests remain planned. Known calculations and
+device limits belong in code.
 
 ## Physical integration and evidence limits
 
@@ -180,4 +193,5 @@ checks or removing obsolete code.
 
 See [the implementation roadmap](roadmap.md) for bounded request interpretation,
 direct inspection judgments, companion context and evaluation. The reusable runner
-is implemented; decision providers and typed robot behavior requests remain planned.
+and optional Jev request interpretation are implemented; direct image judgments
+and typed robot behavior requests remain planned.

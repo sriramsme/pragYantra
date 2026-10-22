@@ -53,6 +53,25 @@ to persist **explicit notes**; transcripts and full conversations are not saved.
 Add `--semantic-memory` to embed new notes and queries through OpenAI instead of
 keyword recall. See [assistant execution](docs/assistant.md) and [memory](docs/memory.md).
 
+## Interpret requests with Jev
+
+Optional request interpretation lets code route natural requests to conversation
+or reporting the latest scene. Install the `decisions` extra and add
+`TYPESAFE_API_KEY` to `.env`:
+
+```bash
+uv tool install --editable '.[audio,webcam,decisions]' --python 3.12
+prag interpret 'What do you see?' --json
+prag chat --interpret --camera
+```
+
+`interpret` only shows a judgment; `chat --interpret` uses it. Following, missions
+and natural-language note saving return an unsupported result. Ambiguity asks for
+clarification; provider failures select no behavior. `/stop` ends the local session
+without calling Jev or sending robot commands. See
+[request interpretation](docs/request-interpretation.md) for the three core files,
+policy, evaluation and limits.
+
 ## See
 
 ```bash
@@ -135,7 +154,7 @@ src/pragyantra/
   application/    Typed values/interfaces, world state, conversation, memory, policies
   inputs/         File/webcam/audio/console acquisition, endpointing, device events
   outputs/        PCM playback, WAV saving, simulated responses
-  providers/      OpenAI inference and SQLite persistence
+  providers/      OpenAI inference, optional TypeSafe judgments, SQLite persistence
   cli/            Configuration, component construction, command handlers
   __main__.py     Python module entry point
 examples/         Small runnable examples using public application interfaces
@@ -160,8 +179,8 @@ uv build
 Normal tests use synthetic frames/audio, fake devices, temporary databases, and
 mock HTTP transports. They require no keys, paid calls, downloads, or physical
 hardware. See [the test map](tests/README.md). Hosted providers are replaceable
-through small protocols; local inference and decision-model providers are not
-implemented yet.
+through small protocols. TypeSafe request interpretation is opt in; local inference
+and direct image-decision providers are not implemented yet.
 
 ## License
 

@@ -8,7 +8,9 @@ from datetime import UTC, datetime
 
 from pragyantra.application.conversation import ConversationResult, ConversationSession
 from pragyantra.application.models import TextObservation
+from pragyantra.application.requests import RequestResult, RequestRouter
 from pragyantra.application.runner import AssistantResult, AssistantRunner
+from pragyantra.cli.requests import request_record
 from pragyantra.inputs.console import ConsoleInput
 from pragyantra.inputs.events import parse_event
 
@@ -67,6 +69,17 @@ async def run_assistant(args):
             embeddings=services if args.semantic_memory else None,
             max_context_age=args.context_max_age,
         )
+        router = None
+        if args.interpret:
+            from pragyantra.providers.typesafe import typesafe_interpreter
+
+            interpreter = await stack.enter_async_context(
+                typesafe_interpreter(
+                    model=args.decision_model,
+                    timeout=args.decision_timeout.total_seconds(),
+                )
+            )
+            router = RequestRouter(interpreter)
         source = None
         if args.webcam is not None:
             from pragyantra.inputs.webcam import WebcamStream
@@ -77,16 +90,21 @@ async def run_assistant(args):
             console = await stack.enter_async_context(ConsoleInput())
 
         async def output(result: AssistantResult):
-            record = (
-                result_record(result)
-                if isinstance(result, ConversationResult)
-                else {
-                    "kind": "touch_response",
-                    "text": result.text,
-                    "status": result.status.value,
-                    "responded_at": result.responded_at.isoformat(),
-                }
-            )
+            if isinstance(result, RequestResult):
+                record = request_record(result)
+                if result.conversation is not None:
+                    record["conversation"] = result_record(result.conversation)
+            else:
+                record = (
+                    result_record(result)
+                    if isinstance(result, ConversationResult)
+                    else {
+                        "kind": "touch_response",
+                        "text": result.text,
+                        "status": result.status.value,
+                        "responded_at": result.responded_at.isoformat(),
+                    }
+                )
             text = record["text"]
             if args.json:
                 print(json.dumps(record, ensure_ascii=False), flush=True)
@@ -148,6 +166,7 @@ async def run_assistant(args):
 
         runner = AssistantRunner(
             session,
+            router=router,
             image_source=source,
             vision=services.vision if source is not None else None,
             vision_interval=args.vision_interval,

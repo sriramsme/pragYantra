@@ -32,7 +32,8 @@ completed robot, model accuracy result or real-time hardware validation.
   optional `text-embedding-3-small`. Do not silently replace requested models.
 - Consult live official provider documentation for version-dependent integrations.
   SDKs/authentication/deadlines/response parsing belong in providers.
-- Jev/OpenAI Decisions remain candidates, not integrated providers. Keep known
+- Jev request interpretation is opt in (`decisions` extra, `jev-1.14.0` default).
+  OpenAI Decisions remains a candidate for direct image judgments. Keep known
   rules/calculations in code and evaluate any semantic judgment on representative
   inputs. Generative conversation is appropriate when behavior requires it.
 
@@ -42,7 +43,7 @@ completed robot, model accuracy result or real-time hardware validation.
   conversation, memory policies, deterministic actions, runtime.
 - `inputs/`: acquisition, normalization, endpointing and device-event parsing.
 - `outputs/`: audio playback/artifacts and simulated output.
-- `providers/`: OpenAI inference and SQLite persistence implementations.
+- `providers/`: OpenAI inference, optional TypeSafe judgments and SQLite persistence.
 - `cli/`: startup composition, arguments, task/resource ownership. The launcher
   remains `pragyantra.cli:main` for both `prag` and `pragyantra`; command-family
   modules keep wiring readable. `.env` loads from the current directory at command
@@ -116,11 +117,23 @@ Keep these semantics unless a requirement explicitly changes them:
 - Deterministic commands dispatch in code; generated conversation has no tools or
   actuator authority. Device JSONL is a strict version-1 observation boundary with
   explicit units/timestamps, not a selected physical transport or controller.
+- `RequestRouter` optionally interprets natural requests. Only conversation and
+  latest-scene reporting have handlers. Follow/mission/natural remember are
+  unsupported; slash commands bypass Jev. Low confidence/probability asks for
+  clarification; invalid/service failures emit provider_failure without fallback
+  or a history entry. Inspection checks freshness after interpretation. Judgment
+  provenance/distribution and acquisition/completion times remain explicit.
+  Thresholds are initial policy, not calibrated accuracy. `/stop` ends only the
+  local runner and waits behind foreground work/initial vision; it is no physical
+  stop guarantee. See `docs/request-interpretation.md`.
 
 Manual file/webcam vision smoke checks were reported successful on October 20,
 2026. The synthetic hosted TTS/ASR/semantic-conversation check also passed; see
 `docs/experiments/`. Actual microphone/speaker operation, sustained capture,
 representative model evaluation, control timing and Pi deployment remain unverified.
+The first 22-case synthetic live Jev check is recorded separately in
+`docs/experiments/2026-10-21-request-interpretation.md`; it is not representative
+robot-command or hardware validation.
 Keep all status documentation aligned with new evidence and limitations.
 
 ## Validation and data handling

@@ -31,6 +31,10 @@ uv run --all-extras prag chat --voice --camera
 the extras once avoids repeating those flags for daily use. No command downloads
 missing optional dependencies automatically.
 
+Jev request interpretation additionally needs the `decisions` extra and
+`TYPESAFE_API_KEY`. Include it in the tool installation with
+`uv tool install --editable '.[audio,webcam,decisions]' --python 3.12`.
+
 ## Everyday commands
 
 ```bash
@@ -39,6 +43,8 @@ prag chat -m 'Hello'                      # one text turn
 prag chat --voice                        # microphone and spoken replies
 prag chat --voice --camera               # voice with background visual context
 prag chat --memory                       # persist explicit notes in data/notes.sqlite
+prag interpret 'What do you see?' -j      # show a Jev judgment; execute nothing
+prag chat --interpret --camera           # route requests to chat or latest scene
 prag see photo.jpg                       # describe a file
 prag see --camera                        # describe one frame from camera 0
 prag watch -n 3                          # three continuous camera descriptions
@@ -88,4 +94,5 @@ standard `--` separator for positional text beginning with option names.
 Keep credentials in ignored `.env` or the shell; `.env.example` has placeholders
 and model defaults. The application never creates a credential file automatically.
 See [assistant](assistant.md), [vision](vision.md), [webcam](webcam.md),
-[audio](audio.md), and [memory](memory.md) guides for capability details.
+[audio](audio.md), [memory](memory.md), and
+[request interpretation](request-interpretation.md) guides for capability details.

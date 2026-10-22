@@ -265,6 +265,11 @@ def _run(argv: list[str], *, prog: str) -> None:
         parser.print_help()
         return
     try:
+        if args.command == "interpret":
+            from pragyantra.cli.requests import interpret
+
+            asyncio.run(interpret(args))
+            return
         if args.command == "chat":
             from pragyantra.cli.assistant import run_assistant
 

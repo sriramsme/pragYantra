@@ -1,0 +1,446 @@
+{
+  "started_from": "synthetic text cases; no image/audio/device input",
+  "recorded_at": "2026-10-22T01:10:30.261987+00:00",
+  "requested_model": "jev-1.14.0",
+  "provider_failures": 1,
+  "cases": 22,
+  "correct_intents": 21,
+  "accepted_route_errors": 0,
+  "clarifications": 0,
+  "median_seconds": 0.147819,
+  "p95_seconds_nearest_rank": 0.493297,
+  "reported_input_tokens": 12181,
+  "usage_missing_cases": 1,
+  "cost_usd": null,
+  "records": [
+    {
+      "id": "greeting",
+      "expected": "conversation",
+      "text": "Hello there!",
+      "intent": "conversation",
+      "confidence": 0.9,
+      "probabilities": {
+        "conversation": 0.92,
+        "inspect": 0.0,
+        "follow": 0.0,
+        "run_named_mission": 0.0,
+        "remember": 0.0,
+        "unknown": 0.08
+      },
+      "model": "jev-1.14.0",
+      "question_version": "intent-v1",
+      "input_tokens": 576,
+      "status": "conversation",
+      "elapsed_seconds": 0.32185
+    },
+    {
+      "id": "question",
+      "expected": "conversation",
+      "text": "Why is the sky blue?",
+      "intent": "conversation",
+      "confidence": 1.0,
+      "probabilities": {
+        "conversation": 1.0,
+        "inspect": 0.0,
+        "follow": 0.0,
+        "run_named_mission": 0.0,
+        "remember": 0.0,
+        "unknown": 0.0
+      },
+      "model": "jev-1.14.0",
+      "question_version": "intent-v1",
+      "input_tokens": 579,
+      "status": "conversation",
+      "elapsed_seconds": 0.14544
+    },
+    {
+      "id": "capability-question",
+      "expected": "conversation",
+      "text": "How does follow mode work?",
+      "intent": "conversation",
+      "confidence": 0.99,
+      "probabilities": {
+        "conversation": 0.99,
+        "inspect": 0.0,
+        "follow": 0.0,
+        "run_named_mission": 0.0,
+        "remember": 0.0,
+        "unknown": 0.01
+      },
+      "model": "jev-1.14.0",
+      "question_version": "intent-v1",
+      "input_tokens": 579,
+      "status": "conversation",
+      "elapsed_seconds": 0.125299
+    },
+    {
+      "id": "hypothetical",
+      "expected": "conversation",
+      "text": "What would happen if I asked a robot to follow me?",
+      "intent": "conversation",
+      "confidence": 1.0,
+      "probabilities": {
+        "conversation": 1.0,
+        "inspect": 0.0,
+        "follow": 0.0,
+        "run_named_mission": 0.0,
+        "remember": 0.0,
+        "unknown": 0.0
+      },
+      "model": "jev-1.14.0",
+      "question_version": "intent-v1",
+      "input_tokens": 585,
+      "status": "conversation",
+      "elapsed_seconds": 0.097523
+    },
+    {
+      "id": "quoted-action",
+      "expected": "conversation",
+      "text": "My friend said 'follow me' in a story. What does that mean?",
+      "intent": "conversation",
+      "confidence": 1.0,
+      "probabilities": {
+        "conversation": 1.0,
+        "inspect": 0.0,
+        "follow": 0.0,
+        "run_named_mission": 0.0,
+        "remember": 0.0,
+        "unknown": 0.0
+      },
+      "model": "jev-1.14.0",
+      "question_version": "intent-v1",
+      "input_tokens": 589,
+      "status": "conversation",
+      "elapsed_seconds": 0.156169
+    },
+    {
+      "id": "negated-action",
+      "expected": "conversation",
+      "text": "Don't follow me.",
+      "intent": "conversation",
+      "confidence": 1.0,
+      "probabilities": {
+        "conversation": 1.0,
+        "inspect": 0.0,
+        "follow": 0.0,
+        "run_named_mission": 0.0,
+        "remember": 0.0,
+        "unknown": 0.0
+      },
+      "model": "jev-1.14.0",
+      "question_version": "intent-v1",
+      "input_tokens": 578,
+      "status": "conversation",
+      "elapsed_seconds": 0.152145
+    },
+    {
+      "id": "memory-question",
+      "expected": "conversation",
+      "text": "Do you remember my favorite color?",
+      "intent": "conversation",
+      "confidence": 1.0,
+      "probabilities": {
+        "conversation": 1.0,
+        "inspect": 0.0,
+        "follow": 0.0,
+        "run_named_mission": 0.0,
+        "remember": 0.0,
+        "unknown": 0.0
+      },
+      "model": "jev-1.14.0",
+      "question_version": "intent-v1",
+      "input_tokens": 580,
+      "status": "conversation",
+      "elapsed_seconds": 0.302644
+    },
+    {
+      "id": "look-around",
+      "expected": "inspect",
+      "text": "Look around.",
+      "intent": "inspect",
+      "confidence": 0.99,
+      "probabilities": {
+        "conversation": 0.0,
+        "inspect": 0.99,
+        "follow": 0.0,
+        "run_named_mission": 0.0,
+        "remember": 0.0,
+        "unknown": 0.01
+      },
+      "model": "jev-1.14.0",
+      "question_version": "intent-v1",
+      "input_tokens": 576,
+      "status": "inspect",
+      "elapsed_seconds": 0.233623
+    },
+    {
+      "id": "current-scene",
+      "expected": "inspect",
+      "text": "What do you see?",
+      "intent": "inspect",
+      "confidence": 0.98,
+      "probabilities": {
+        "conversation": 0.01,
+        "inspect": 0.98,
+        "follow": 0.0,
+        "run_named_mission": 0.0,
+        "remember": 0.0,
+        "unknown": 0.01
+      },
+      "model": "jev-1.14.0",
+      "question_version": "intent-v1",
+      "input_tokens": 578,
+      "status": "inspect",
+      "elapsed_seconds": 0.112158
+    },
+    {
+      "id": "camera-description",
+      "expected": "inspect",
+      "text": "Describe the currently available camera scene.",
+      "intent": "inspect",
+      "confidence": 1.0,
+      "probabilities": {
+        "conversation": 0.0,
+        "inspect": 1.0,
+        "follow": 0.0,
+        "run_named_mission": 0.0,
+        "remember": 0.0,
+        "unknown": 0.0
+      },
+      "model": "jev-1.14.0",
+      "question_version": "intent-v1",
+      "input_tokens": 580,
+      "status": "inspect",
+      "elapsed_seconds": 0.154904
+    },
+    {
+      "id": "visual-report",
+      "expected": "inspect",
+      "text": "Give me a description of your latest visual observation.",
+      "intent": "inspect",
+      "confidence": 0.94,
+      "probabilities": {
+        "conversation": 0.02,
+        "inspect": 0.95,
+        "follow": 0.0,
+        "run_named_mission": 0.0,
+        "remember": 0.0,
+        "unknown": 0.03
+      },
+      "model": "jev-1.14.0",
+      "question_version": "intent-v1",
+      "input_tokens": 583,
+      "status": "inspect",
+      "elapsed_seconds": 0.150198
+    },
+    {
+      "id": "follow-person",
+      "expected": "follow",
+      "text": "Follow me.",
+      "intent": "follow",
+      "confidence": 0.99,
+      "probabilities": {
+        "conversation": 0.0,
+        "inspect": 0.0,
+        "follow": 0.99,
+        "run_named_mission": 0.0,
+        "remember": 0.0,
+        "unknown": 0.01
+      },
+      "model": "jev-1.14.0",
+      "question_version": "intent-v1",
+      "input_tokens": 576,
+      "status": "unsupported",
+      "elapsed_seconds": 0.532261
+    },
+    {
+      "id": "follow-marker",
+      "expected": "follow",
+      "text": "Please follow the red marker.",
+      "intent": "follow",
+      "confidence": 0.89,
+      "probabilities": {
+        "conversation": 0.0,
+        "inspect": 0.0,
+        "follow": 0.91,
+        "run_named_mission": 0.01,
+        "remember": 0.0,
+        "unknown": 0.08
+      },
+      "model": "jev-1.14.0",
+      "question_version": "intent-v1",
+      "input_tokens": 579,
+      "status": "unsupported",
+      "elapsed_seconds": 0.10482
+    },
+    {
+      "id": "mission",
+      "expected": "run_named_mission",
+      "text": "Run the evening inspection mission.",
+      "intent": "run_named_mission",
+      "confidence": 1.0,
+      "probabilities": {
+        "conversation": 0.0,
+        "inspect": 0.0,
+        "follow": 0.0,
+        "run_named_mission": 1.0,
+        "remember": 0.0,
+        "unknown": 0.0
+      },
+      "model": "jev-1.14.0",
+      "question_version": "intent-v1",
+      "input_tokens": 579,
+      "status": "unsupported",
+      "elapsed_seconds": 0.101385
+    },
+    {
+      "id": "station",
+      "expected": "run_named_mission",
+      "text": "Go to the desk station and inspect it.",
+      "intent": "run_named_mission",
+      "confidence": 0.99,
+      "probabilities": {
+        "conversation": 0.0,
+        "inspect": 0.0,
+        "follow": 0.0,
+        "run_named_mission": 0.99,
+        "remember": 0.0,
+        "unknown": 0.01
+      },
+      "model": "jev-1.14.0",
+      "question_version": "intent-v1",
+      "input_tokens": 582,
+      "status": "unsupported",
+      "elapsed_seconds": 0.136786
+    },
+    {
+      "id": "save-note",
+      "expected": "remember",
+      "text": "Remember that the blue mug belongs to Casey.",
+      "intent": "remember",
+      "confidence": 1.0,
+      "probabilities": {
+        "conversation": 0.0,
+        "inspect": 0.0,
+        "follow": 0.0,
+        "run_named_mission": 0.0,
+        "remember": 1.0,
+        "unknown": 0.0
+      },
+      "model": "jev-1.14.0",
+      "question_version": "intent-v1",
+      "input_tokens": 582,
+      "status": "unsupported",
+      "elapsed_seconds": 0.076724
+    },
+    {
+      "id": "preference",
+      "expected": "remember",
+      "text": "Save my preference for short replies.",
+      "intent": "remember",
+      "confidence": 1.0,
+      "probabilities": {
+        "conversation": 0.0,
+        "inspect": 0.0,
+        "follow": 0.0,
+        "run_named_mission": 0.0,
+        "remember": 1.0,
+        "unknown": 0.0
+      },
+      "model": "jev-1.14.0",
+      "question_version": "intent-v1",
+      "input_tokens": 580,
+      "status": "unsupported",
+      "elapsed_seconds": 0.126736
+    },
+    {
+      "id": "missing-referent",
+      "expected": "unknown",
+      "text": "Do that again.",
+      "intent": "unknown",
+      "confidence": 1.0,
+      "probabilities": {
+        "conversation": 0.0,
+        "inspect": 0.0,
+        "follow": 0.0,
+        "run_named_mission": 0.0,
+        "remember": 0.0,
+        "unknown": 1.0
+      },
+      "model": "jev-1.14.0",
+      "question_version": "intent-v1",
+      "input_tokens": 577,
+      "status": "unknown",
+      "elapsed_seconds": 0.125056
+    },
+    {
+      "id": "compound",
+      "expected": "unknown",
+      "text": "Tell me a joke and then follow me.",
+      "intent": "unknown",
+      "confidence": 0.92,
+      "probabilities": {
+        "conversation": 0.0,
+        "inspect": 0.0,
+        "follow": 0.07,
+        "run_named_mission": 0.0,
+        "remember": 0.0,
+        "unknown": 0.93
+      },
+      "model": "jev-1.14.0",
+      "question_version": "intent-v1",
+      "input_tokens": 582,
+      "status": "unknown",
+      "elapsed_seconds": 0.194559
+    },
+    {
+      "id": "new-photo",
+      "expected": "unknown",
+      "text": "Take a new photograph and save it.",
+      "intent": null,
+      "status": "provider_failure",
+      "error": "TypeSafe returned an invalid request judgment",
+      "elapsed_seconds": 0.430156
+    },
+    {
+      "id": "unrelated-action",
+      "expected": "unknown",
+      "text": "Delete all the files in my downloads folder.",
+      "intent": "unknown",
+      "confidence": 0.84,
+      "probabilities": {
+        "conversation": 0.05,
+        "inspect": 0.0,
+        "follow": 0.0,
+        "run_named_mission": 0.08,
+        "remember": 0.0,
+        "unknown": 0.87
+      },
+      "model": "jev-1.14.0",
+      "question_version": "intent-v1",
+      "input_tokens": 582,
+      "status": "unknown",
+      "elapsed_seconds": 0.493297
+    },
+    {
+      "id": "noise",
+      "expected": "unknown",
+      "text": "asdf qwer zxcv",
+      "intent": "unknown",
+      "confidence": 1.0,
+      "probabilities": {
+        "conversation": 0.0,
+        "inspect": 0.0,
+        "follow": 0.0,
+        "run_named_mission": 0.0,
+        "remember": 0.0,
+        "unknown": 1.0
+      },
+      "model": "jev-1.14.0",
+      "question_version": "intent-v1",
+      "input_tokens": 579,
+      "status": "unknown",
+      "elapsed_seconds": 0.112719
+    }
+  ]
+}

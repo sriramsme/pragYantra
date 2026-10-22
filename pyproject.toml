@@ -22,6 +22,9 @@ webcam = [
 audio = [
     "sounddevice>=0.5.6",
 ]
+decisions = [
+    "typesafe-sdk>=0.7.5",
+]
 
 [build-system]
 requires = ["uv_build>=0.11.24,<0.12.0"]

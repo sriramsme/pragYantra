@@ -7,6 +7,13 @@ coordinates turns/perception; `cli/assistant.py` constructs resources, supplies
 observations and formats results. See [Python embedding](embedding.md) for use
 without a CLI subprocess.
 
+Add `--interpret` for optional Jev request routing before conversation. Only
+conversation and reporting the latest scene have handlers. Uncertain requests
+ask for clarification; failed judgments select no behavior. See
+[request interpretation](request-interpretation.md) for setup, JSON and limits.
+The ordinary turn sequence below applies when routing is disabled or selects
+conversation. Slash commands always bypass interpretation.
+
 ## Choose inputs
 
 ```bash
@@ -71,9 +78,10 @@ descriptions; the application prints it rather than creating a session log.
 | `/reset` | Clear conversation history; retain notes and sensory state |
 | `/help` | Show commands |
 | `/quit`, `/exit` | Exit text input |
+| `/stop` | End the local runner session; send no physical stop command |
 
 `--commands-only` disables hosted capabilities and accepts deterministic commands.
-It cannot combine with audio, webcam, spoken output, or semantic memory.
+It cannot combine with audio, webcam, spoken output, semantic memory or interpretation.
 `calc` also exists as a standalone command. Arithmetic has bounded syntax, numeric
 size, exponent, and function limits. Constants include `pi`, `e`, `c`, `G`, `h`,
 and `k_B`; values use SI conventions, without dimensional analysis.
@@ -92,7 +100,9 @@ the requested modality/settings; the application does not silently substitute on
 
 Chat uses a default 30-second per-request deadline, configurable with `--timeout`.
 This does not bound device acquisition, a complete voice turn, or native shutdown.
-Source/provider/output failures stop the session. A task group cancels ongoing
+Source, conversation/vision provider and output failures stop the session. Optional
+interpretation failures instead emit `provider_failure` and allow another request.
+A task group cancels ongoing
 foreground work if background perception fails, and cancels perception when input
 ends or Ctrl+C occurs. The application runner owns that task group and input
 iterator cleanup. The CLI's exit stack closes acquired resources in reverse order.

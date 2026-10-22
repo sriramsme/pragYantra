@@ -42,6 +42,22 @@ def add_commands(commands, *, duration, count, timestamp, camera_index):
         help="Read version-1 JSONL text/sensor/touch events from stdin",
     )
     session.add_argument(
+        "--interpret",
+        action="store_true",
+        help="Route natural requests through Jev (opt in)",
+    )
+    chat_models.add_argument(
+        "--decision-model",
+        default=os.getenv("PRAGYANTRA_DECISION_MODEL", "jev-1.14.0"),
+        help="Jev request-interpretation model",
+    )
+    chat_models.add_argument(
+        "--decision-timeout",
+        type=duration,
+        default=timedelta(seconds=10),
+        metavar="SECONDS",
+    )
+    session.add_argument(
         "--commands-only",
         action="store_true",
         help="Local /commands only; no hosted providers or credentials",
@@ -102,6 +118,15 @@ def add_commands(commands, *, duration, count, timestamp, camera_index):
     chat_output.add_argument(
         "--speak", action="store_true", help="Speak replies using AI-generated speech"
     )
+    interpret = commands.add_parser(
+        "interpret", help="Judge a request without running a behavior"
+    )
+    interpret.add_argument("text")
+    interpret.add_argument(
+        "--decision-model", default=os.getenv("PRAGYANTRA_DECISION_MODEL", "jev-1.14.0")
+    )
+    interpret.add_argument("--timeout", type=duration, default=timedelta(seconds=10))
+    interpret.add_argument("-j", "--json", action="store_true")
     listen = commands.add_parser(
         "listen", help="Transcribe one WAV file or microphone utterance"
     )
@@ -236,9 +261,11 @@ def validate(args, parser):
             or args.speak
             or args.webcam is not None
             or args.semantic_memory
+            or args.interpret
         ):
             parser.error(
-                "--commands-only does not use hosted audio, vision, or embeddings"
+                "--commands-only does not use hosted audio, vision, embeddings, "
+                "or request interpretation"
             )
         if args.count is not None and not args.voice:
             parser.error(

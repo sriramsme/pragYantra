@@ -18,8 +18,9 @@ Text / audio / images / sensor observations
 Conversation, observation results, or a typed behavior request
 ```
 
-The judgment/behavior-request stages are planned. Existing conversation uses
-explicit commands and a generative provider without model-generated tool execution.
+Bounded request interpretation is opt in; typed robot behavior requests remain
+planned. Conversation uses explicit commands and a generative provider without
+model-generated tool execution.
 
 ## A — Embed existing capabilities
 
@@ -35,9 +36,11 @@ integration evidence, not a rover deployment or hardware validation.
 
 ## B — First decision-model behavior
 
-**Planned:** request interpretation using a bounded vocabulary such as
+**First slice implemented:** optional TypeSafe Jev interpretation selects among
 `conversation`, `inspect`, `follow`, `run_named_mission`, `remember`, and `unknown`.
-Start with one working behavior/provider; add capabilities when they exist.
+Only conversation and reporting an existing current scene have handlers. The other
+action intents return unsupported; uncertainty asks for clarification and provider
+failure selects no behavior. See [request interpretation](request-interpretation.md).
 
 A model-selected intent is not an executable request. Application code must
 validate capability, known mission/target identifiers, bounded arguments and
@@ -49,18 +52,21 @@ into accepted requests or conversational claims of execution.
 Explicit control commands bypass semantic inference. Rover must enforce stop and
 command expiry independently of a blocked conversation/provider call. TypeSafe's
 [function-selection cookbook](https://docs.typesafe.ai/cookbooks/function_calling)
-is a design reference for known handlers and closed-set arguments; it is not an
-integrated dependency or a general free-text argument extractor.
+is the design reference. The optional SDK is integrated for closed-set selection;
+no free-text argument extractor or typed robot behavior request exists yet.
 
 Completion criterion: representative requests produce validated outcomes,
 ambiguity has a defined response and failures cannot produce executable requests.
+Fake-provider/SDK tests cover those software paths. The initial live 22-case
+synthetic check recorded 21 matching intents and one invalid result rejected
+without a route. Broader independent evaluation remains outstanding.
 
 ## C — Direct inspection judgments
 
 **Planned:** target visibility, named-station matching and specific inspection
 conditions over image evidence. OpenAI's
 [Decisions documentation](https://developers.openai.com/api/docs/guides/decisions)
-is a candidate provider reference; no decision provider is integrated yet.
+is a candidate provider reference; no direct image-decision provider is integrated yet.
 
 Measurements, model judgments and generated descriptions remain distinct values.
 Judgments need evidence references, acquisition/completion times, question/criteria
@@ -86,7 +92,9 @@ separate from current sensory evidence.
 
 **Existing foundation:** normal tests use fake providers, synthetic images/audio,
 logical clocks and guarded device/network access. Live hosted smoke checks are
-recorded separately. Decision-model evaluation remains planned alongside B/C.
+recorded separately. A curated text fixture and explicit live Jev evaluation
+script accompany B; direct-image evaluation remains planned alongside C. See the
+[first request experiment](experiments/2026-10-21-request-interpretation.md).
 
 Build representative text cases and recorded/synthetic image fixtures. Include
 negation, quoted/hypothetical commands, missing targets and compound requests.

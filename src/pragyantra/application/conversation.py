@@ -55,7 +55,8 @@ class ConversationResult:
 
 HELP = (
     "Commands: /context, /calc EXPRESSION, /remember TEXT, /recall QUERY, "
-    "/forget ID, /reset, /help, /quit. Other input starts a conversation."
+    "/forget ID, /reset, /help, /quit. /stop ends an AssistantRunner session. "
+    "Other input starts a conversation unless request interpretation is enabled."
 )
 
 

@@ -16,11 +16,12 @@ from pragyantra.application.models import (
     require_aware,
 )
 from pragyantra.application.observation_loop import VisualObservationLoop
+from pragyantra.application.requests import RequestResult, RequestRouter, RequestStatus
 
 type AssistantInput = (
     TextObservation | SensorObservation | TouchObservation | VisualObservation
 )
-type AssistantResult = ConversationResult | ContextResponse
+type AssistantResult = ConversationResult | ContextResponse | RequestResult
 
 
 class AssistantRunner:
@@ -37,6 +38,7 @@ class AssistantRunner:
         session: ConversationSession,
         *,
         image_source: ImageSource | None = None,
+        router: RequestRouter | None = None,
         vision: VisionProvider | None = None,
         vision_interval: timedelta = timedelta(seconds=5),
         now: Callable[[], datetime] = lambda: datetime.now(UTC),
@@ -45,6 +47,7 @@ class AssistantRunner:
         if (image_source is None) != (vision is None):
             raise ValueError("Supply both image_source and vision, or neither")
         self.session = session
+        self._router = router
         self._source = image_source
         self._vision = vision
         self._now = now
@@ -72,6 +75,16 @@ class AssistantRunner:
             return DescribeOnTouch(self.session.max_context_age).respond(
                 self.session.state, observation, at=at
             )
+        text = observation.text.strip()
+        if text == "/stop":
+            return RequestResult(
+                observation,
+                RequestStatus.STOPPED,
+                "Assistant session stopped. No robot command was sent.",
+                at,
+            )
+        if self._router is not None and not text.startswith("/"):
+            return await self._router.respond(observation, self.session)
         return await self.session.respond(observation)
 
     async def run(
@@ -104,6 +117,11 @@ class AssistantRunner:
                     result = await self._handle(observation)
                     if result is not None:
                         await on_result(result)
+                        if (
+                            isinstance(result, RequestResult)
+                            and result.status == RequestStatus.STOPPED
+                        ):
+                            break
             finally:
                 close = getattr(iterator, "aclose", None)
                 if close is not None:
