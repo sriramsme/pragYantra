@@ -115,9 +115,11 @@ Keep these semantics unless a requirement explicitly changes them:
   recall is local keywords; opt-in semantic mode embeds new notes/queries, compares
   matching model/dimensions, and has an unevaluated 0.3 cosine threshold. No
   automatic transcript persistence, legacy pickle loading or silent backfill.
-- Deterministic commands dispatch in code; generated conversation has no tools or
-  actuator authority. Device JSONL is a strict version-1 observation boundary with
-  explicit units/timestamps, not a selected physical transport or controller.
+- Deterministic slash commands live in `application/commands.py`; the session owns
+  turn locking/history, and commands/conversation share `memory.recall` policy.
+  Generated conversation has no tools or actuator authority. Device JSONL is a
+  strict version-1 observation boundary with explicit units/timestamps, not a
+  selected physical transport or controller.
   The obsolete calculator command and numeric helper were removed; do not restore
   a generic actions module without a concrete application responsibility.
 - `RequestRouter` optionally interprets natural requests. Only conversation and

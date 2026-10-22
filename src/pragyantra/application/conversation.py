@@ -1,15 +1,14 @@
-"""Conversation coordinates bounded history, sensory evidence and explicit actions."""
+"""Coordinate turns with bounded history, sensory evidence and saved context."""
 
 import asyncio
-import json
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Protocol
 
+from pragyantra.application.commands import run_command
 from pragyantra.application.companion import (
     CompanionEntry,
     CompanionRepository,
-    ContextKind,
     InMemoryCompanion,
 )
 from pragyantra.application.memory import (
@@ -19,6 +18,7 @@ from pragyantra.application.memory import (
     InMemoryNotes,
     MemoryNote,
     NoteRepository,
+    recall,
 )
 from pragyantra.application.models import TextObservation, require_aware
 from pragyantra.application.world_state import EnvironmentSnapshot, WorldState
@@ -60,14 +60,6 @@ class ConversationResult:
     companion: tuple[CompanionEntry, ...] = ()
 
 
-HELP = (
-    "Commands: /context, /remember TEXT, /recall QUERY, "
-    "/forget ID, /profile [KIND KEY VALUE], /unprofile KIND KEY, /reset, /help, "
-    "/quit. /stop ends an AssistantRunner session. "
-    "Other input starts a conversation unless request interpretation is enabled."
-)
-
-
 class ConversationSession:
     def __init__(
         self,
@@ -93,88 +85,6 @@ class ConversationSession:
         self._now = now or (lambda: datetime.now(UTC))
         self._lock = asyncio.Lock()
 
-    async def _command(self, text: str, environment: EnvironmentSnapshot) -> str | None:
-        if not text.startswith("/"):
-            return None
-        command, _, argument = text.partition(" ")
-        argument = argument.strip()
-        if command == "/profile":
-            if not argument:
-                records = [entry.to_record() for entry in self.companion.entries()]
-                text = json.dumps(records, ensure_ascii=False)
-                if len(text) > 12000:
-                    # Keep a full store readable within the existing reply bound.
-                    records = [
-                        dict(
-                            row,
-                            value=row["value"][:40],
-                            truncated=len(row["value"]) > 40,
-                        )
-                        for row in records
-                    ]
-                    text = json.dumps(records, ensure_ascii=False)
-                return text
-            parts = argument.split(maxsplit=2)
-            if len(parts) != 3:
-                raise ValueError("Use /profile KIND KEY VALUE")
-            self.companion.set(
-                CompanionEntry(
-                    ContextKind(parts[0]), parts[1], parts[2], environment.as_of
-                )
-            )
-            return "Saved explicit companion context."
-        if command == "/unprofile":
-            parts = argument.split()
-            if len(parts) != 2:
-                raise ValueError("Use /unprofile KIND KEY")
-            return (
-                "Context removed."
-                if self.companion.delete(ContextKind(parts[0]), parts[1])
-                else "No matching context."
-            )
-        if command == "/help":
-            return HELP
-        if command == "/context":
-            return json.dumps(environment.to_record(), ensure_ascii=False)
-        if command == "/remember":
-            if not argument or len(argument) > 2000:
-                raise ValueError("Memory requires 1–2000 characters")
-            embedding = (
-                await self.embeddings.embed(argument) if self.embeddings else None
-            )
-            note = self.notes.add(argument, at=environment.as_of, embedding=embedding)
-            return f"Remembered note {note.id}: {note.text}"
-        if command == "/recall":
-            notes = await self._recall(argument)
-            return (
-                "\n".join(
-                    f"[{note.id}] {note.created_at.isoformat()} {note.text}"
-                    for note in notes
-                )
-                or "No matching memories."
-            )
-        if command == "/forget":
-            if not argument.isdecimal() or int(argument) <= 0:
-                raise ValueError("Use /forget with a positive note ID")
-            return (
-                "Note forgotten."
-                if self.notes.forget(int(argument))
-                else "Note not found."
-            )
-        if command == "/reset":
-            self.history.clear()
-            return (
-                "Conversation history cleared. "
-                "Explicit notes and sensory context are retained."
-            )
-        return f"Unknown command. {HELP}"
-
-    async def _recall(self, query: str) -> tuple[MemoryNote, ...]:
-        if self.embeddings is not None and query.strip():
-            embedding = await self.embeddings.embed(query)
-            return self.notes.semantic_search(embedding, limit=3)
-        return self.notes.search(query, limit=3)
-
     async def respond(self, message: TextObservation) -> ConversationResult:
         async with self._lock:
             at = self._now()
@@ -182,14 +92,23 @@ class ConversationSession:
             if message.observed_at > at:
                 raise ValueError("User input is ahead of the session clock")
             environment = self.state.snapshot(at=at, max_age=self.max_context_age)
-            command = await self._command(message.text.strip(), environment)
+            command = await run_command(
+                message.text.strip(),
+                environment=environment,
+                notes=self.notes,
+                companion=self.companion,
+                history=self.history,
+                embeddings=self.embeddings,
+            )
             memories: tuple[MemoryNote, ...] = ()
             companion: tuple[CompanionEntry, ...] = ()
             if command is not None:
                 reply = GeneratedReply(command, "builtin", "commands-v1")
             else:
                 companion = self.companion.entries()
-                memories = await self._recall(message.text[:2000])
+                memories = await recall(
+                    self.notes, message.text[:2000], embeddings=self.embeddings
+                )
                 request = ConversationRequest(
                     message,
                     self.history.messages,

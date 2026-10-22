@@ -44,9 +44,9 @@ the temporal experiment belongs to `watch`.
    `WorldState` snapshot. It retains one latest visual description and at most 32
    scalar channels, keyed by `(source, kind)`. Older/equal acquisitions cannot
    overwrite the retained value.
-3. `/commands` dispatch in code. Ordinary conversation retrieves up to three
-   relevant explicit notes and passes those, the snapshot, and bounded recent
-   exchanges to `ConversationProvider.respond`.
+3. Slash commands dispatch through `application/commands.py`. Ordinary conversation
+   retrieves up to three relevant explicit notes and passes those, the snapshot,
+   and bounded recent exchanges to `ConversationProvider.respond`.
 4. `OpenAIServices` builds a Responses request. Context and notes are labeled as
    untrusted evidence. No model-generated function calls or physical actions are
    enabled. Returned text is validated before entering history.

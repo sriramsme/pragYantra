@@ -10,6 +10,7 @@ from pragyantra.application.conversation import ConversationResult, Conversation
 from pragyantra.application.models import TextObservation
 from pragyantra.application.requests import RequestResult, RequestRouter
 from pragyantra.application.runner import AssistantResult, AssistantRunner
+from pragyantra.cli.records import text_record
 from pragyantra.cli.requests import request_record
 from pragyantra.inputs.console import ConsoleInput
 from pragyantra.inputs.events import parse_event
@@ -18,7 +19,7 @@ from pragyantra.inputs.events import parse_event
 class CommandsOnly:
     async def respond(self, request):
         raise ValueError(
-            "Conversation needs a provider; use /commands in commands-only mode"
+            "Conversation needs a provider; try /help in commands-only mode"
         )
 
 
@@ -28,13 +29,7 @@ def result_record(result: ConversationResult) -> dict[str, object]:
         "text": result.reply.text,
         "provider": result.reply.provider,
         "model": result.reply.model,
-        "input": {
-            "source": result.message.source,
-            "observed_at": result.message.observed_at.isoformat(),
-            "text": result.message.text,
-            "provider": result.message.provider,
-            "model": result.message.model,
-        },
+        "input": text_record(result.message),
         "responded_at": result.responded_at.isoformat(),
         "environment": result.environment.to_record(),
         "memory_ids": [note.id for note in result.memories],

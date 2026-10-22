@@ -3,6 +3,8 @@
 import asyncio
 import json
 
+from pragyantra.cli.records import text_record
+
 
 async def listen(args):
     from pragyantra.providers.openai_services import openai_services
@@ -31,11 +33,7 @@ async def listen(args):
         print(
             json.dumps(
                 {
-                    "text": transcript.text,
-                    "source": transcript.source,
-                    "observed_at": transcript.observed_at.isoformat(),
-                    "provider": transcript.provider,
-                    "model": transcript.model,
+                    **text_record(transcript),
                     "duration_seconds": clip.duration,
                 }
             )

@@ -10,9 +10,11 @@ import pytest
 
 from pragyantra import cli
 from pragyantra.application.audio import AudioClip
+from pragyantra.application.companion import CompanionEntry, ContextKind
 from pragyantra.application.conversation import GeneratedReply
 from pragyantra.application.models import ImageFrame, SceneDescription, TextObservation
 from pragyantra.providers import openai_services
+from pragyantra.providers.memory import SQLiteNotes
 
 
 def test_local_script_persists_and_recalls_explicit_memory(tmp_path):
@@ -54,6 +56,38 @@ def test_local_script_persists_and_recalls_explicit_memory(tmp_path):
         check=True,
     )
     assert json.loads(lookup.stdout)[0]["text"] == "The blue mug is mine"
+
+
+def test_saved_profile_reaches_conversation_and_result_json(
+    tmp_path, monkeypatch, capsys
+):
+    database = tmp_path / "notes.sqlite"
+    entry = CompanionEntry(ContextKind.NAME, "user", "Casey", datetime.now(UTC))
+    with SQLiteNotes(database) as notes:
+        notes.companion.set(entry)
+    requests = []
+
+    class Services:
+        async def respond(self, request):
+            requests.append(request)
+            return GeneratedReply("Hello Casey", "fake", "chat")
+
+    @asynccontextmanager
+    async def provider(**kwargs):
+        yield Services()
+
+    monkeypatch.setattr(openai_services, "openai_services", provider)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["prag", "chat", "--memory", str(database), "-m", "Hello", "-j"],
+    )
+    cli.main()
+    record = json.loads(capsys.readouterr().out)
+    assert requests[0].companion == (entry,)
+    assert record["companion"] == [entry.to_record()]
+    assert record["environment"]["visual"] is None
+    assert record["environment"]["sensors"] == []
 
 
 def test_jsonl_hardware_events_update_context_and_touch_without_models():
@@ -182,6 +216,13 @@ def test_integrated_camera_audio_reply_and_speech_close_all_contexts(
     cli.main()
     records = [json.loads(line) for line in capsys.readouterr().out.splitlines()]
     assert len(records) == 2
+    assert records[0]["input"] == {
+        "source": "file:utterance.wav",
+        "observed_at": requests[0].message.observed_at.isoformat(),
+        "text": "What do you see?",
+        "provider": "fake",
+        "model": "asr",
+    }
     assert requests[0].environment.visual.description == "A blue mug on the desk."
     assert len(requests[1].history) == 2
     assert events[-2:] == ["camera close", "provider close"]

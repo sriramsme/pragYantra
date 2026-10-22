@@ -9,6 +9,7 @@ from pragyantra.application.requests import (
     RequestResult,
     select_behavior,
 )
+from pragyantra.cli.records import text_record
 
 
 def judgment_record(judgment: IntentJudgment | None):
@@ -30,13 +31,7 @@ def request_record(result: RequestResult):
         "kind": "request_result",
         "status": result.status.value,
         "text": result.text,
-        "input": {
-            "source": result.message.source,
-            "observed_at": result.message.observed_at.isoformat(),
-            "text": result.message.text,
-            "provider": result.message.provider,
-            "model": result.message.model,
-        },
+        "input": text_record(result.message),
         "responded_at": result.responded_at.isoformat(),
         "judged_at": result.judged_at.isoformat() if result.judged_at else None,
         "judgment": judgment_record(result.judgment),

@@ -52,7 +52,7 @@ unchanged. Names are preferences/context, not visual identity recognition.
 
 Read `application/companion.py` for the values and in-memory implementation,
 `providers/companion.py` for SQLite operations, and the profile branches in
-`application/conversation.py` for deterministic commands. `SQLiteNotes.companion`
+`application/commands.py` for deterministic commands. `SQLiteNotes.companion`
 shares its owning connection; closing the note store also ends context access.
 Schema version 3 adds a companion table while preserving existing version 1/2
 notes and embeddings. No legacy Python serialization is loaded.

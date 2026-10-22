@@ -76,6 +76,19 @@ class NoteRepository(Protocol):
     def forget(self, note_id: int) -> bool: ...
 
 
+async def recall(
+    notes: NoteRepository,
+    query: str,
+    *,
+    embeddings: EmbeddingProvider | None = None,
+) -> tuple[MemoryNote, ...]:
+    """Use the same bounded recall policy for commands and conversation."""
+    if embeddings is not None and query.strip():
+        embedding = await embeddings.embed(query)
+        return notes.semantic_search(embedding, limit=3)
+    return notes.search(query, limit=3)
+
+
 def search_terms(query: str) -> tuple[str, ...]:
     if len(query) > 2000:
         raise ValueError("Memory query exceeds 2000 characters")

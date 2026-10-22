@@ -47,7 +47,8 @@ without collecting historical code.
 ## Assistant, audio, memory and device boundaries
 
 - `test_conversation.py`: sensory snapshots, recalled notes, bounded complete
-  exchanges, deterministic commands, failed-turn atomicity and semantic recall.
+  exchanges, deterministic/unknown commands, failed-command/turn atomicity and
+  semantic recall.
 - `test_notes.py`: in-memory/SQLite repositories, reopen, date bounds, forget,
   capacity, safe query text, schema migration and embedding compatibility/validation.
 - `test_audio.py`: WAV/PCM validation, acquisition timestamps, energy endpointing,
@@ -60,7 +61,8 @@ without collecting historical code.
   synthesis and embeddings, with errors/timeouts and explicit request settings.
 - `test_assistant_cli.py`: subprocess note persistence/recall and JSONL events;
   integrated fake camera + audio + conversation + speech, half-duplex ordering,
-  startup/perception/output failure and cancellation cleanup.
+  saved profile wiring and input provenance, startup/perception/output failure
+  and cancellation cleanup.
 
 A synthetic paid-service smoke check is documented in
 [the experiment log](../docs/experiments/2026-10-20-assistant-smoke.md); it is not

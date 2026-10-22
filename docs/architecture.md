@@ -79,8 +79,9 @@ SDK objects stay inside providers.
 | `application/requests.py` | Bounded intent values, uncertainty/capability rules and optional request routing |
 | `application/inspection.py` | Direct image judgments with evidence references, acquisition age and consumption checks |
 | `application/companion.py` | Explicit saved names/preferences/observations, independent of sensor state |
-| `application/conversation.py` | Serialize turns; combine sensory snapshot, notes and history; dispatch explicit commands |
-| `application/memory.py` | Notes, embedding contract/cosine retrieval and bounded complete exchanges |
+| `application/conversation.py` | Handle one turn at a time; combine sensory snapshot, saved context, notes and history |
+| `application/commands.py` | Explicit slash commands for context, notes, profile and history |
+| `application/memory.py` | Notes, shared keyword/semantic recall policy and bounded complete exchanges |
 | `application/behavior.py`, `runtime.py` | Deterministic touch-to-visual-context behavior and simulated event runtime |
 | `inputs/image.py`, `webcam.py` | Shared image normalization; one-shot and continuous camera acquisition |
 | `inputs/audio.py`, `microphone.py`, `vad.py` | WAV loading, bounded capture, energy endpointing |
@@ -93,6 +94,21 @@ SDK objects stay inside providers.
 | `providers/companion.py` | Context entries sharing the note database's owned connection |
 | `cli/__init__.py`, `configure.py` | Launcher, argument definitions and validation |
 | `cli/assistant.py`, `audio.py`, `vision.py`, `inspection.py`, `memory.py` | Startup composition for each command family |
+| `cli/records.py` | Shared text-input fields for conversation, request and transcription JSON |
+
+`ConversationSession.respond` takes the sensory snapshot, delegates slash commands
+to `run_command`, and otherwise builds a request for the conversation provider.
+Both commands and conversation use `memory.recall` for the same retrieval policy.
+The session keeps the turn lock and history updates; moving commands does not
+create another owner of session state.
+
+New behavior should receive the capability it needs as an argument. For existing
+visual understanding, use `WorldState.snapshot(at=..., max_age=...)`, which labels
+the retained scene's age. A new capture instead needs an `ImageSource`, and its
+interpretation needs a `VisionProvider`. These are different operations. The
+current camera stream has one consumer; a behavior must not compete with background
+vision for `read()`. Shared capture and saving images remain future work, to be
+designed around a concrete feature. There is no global camera or service registry.
 
 ## State and timing
 

@@ -1,4 +1,4 @@
-"""Integrated context, bounded history, explicit actions, and failure atomicity."""
+"""Integrated context, bounded history, local commands and failure atomicity."""
 
 import asyncio
 from datetime import UTC, datetime, timedelta
@@ -69,6 +69,35 @@ def test_commands_never_call_model_and_notes_can_be_forgotten():
         assert (
             await session.respond(message("/recall door"))
         ).reply.text == "No matching memories."
+        assert provider.requests == []
+
+    asyncio.run(scenario())
+
+
+def test_unknown_commands_do_not_fall_through_to_conversation():
+    async def scenario():
+        provider = Provider()
+        session = ConversationSession(provider, now=lambda: NOW)
+        result = await session.respond(message("/not-a-command"))
+        assert result.reply.text.startswith("Unknown command.")
+        assert result.reply.provider == "builtin"
+        assert provider.requests == []
+
+    asyncio.run(scenario())
+
+
+@pytest.mark.parametrize("text", ["/remember", "/forget 0", "/profile name user"])
+def test_invalid_commands_preserve_stores_and_history(text):
+    async def scenario():
+        provider = Provider()
+        session = ConversationSession(provider, now=lambda: NOW)
+        await session.respond(message("/remember A blue door"))
+        before = session.history.messages
+        with pytest.raises(ValueError):
+            await session.respond(message(text))
+        assert session.history.messages == before
+        assert [note.text for note in session.notes.search("")] == ["A blue door"]
+        assert session.companion.entries() == ()
         assert provider.requests == []
 
     asyncio.run(scenario())

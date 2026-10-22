@@ -101,6 +101,7 @@ def test_profile_commands_and_conversation_separate_context_from_sensors():
         assert len(request.companion) == 3 and request.memories == ()
         assert request.environment.visual is None and request.environment.sensors == ()
         await session.respond(TextObservation("test", AT, "/reset"))
+        assert session.history.messages == ()
         assert len(session.companion.entries()) == 3
         await session.respond(TextObservation("test", AT, "/unprofile name user"))
         assert len(session.companion.entries()) == 2

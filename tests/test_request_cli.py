@@ -110,6 +110,10 @@ def test_opt_in_chat_preserves_judgment_and_conversation_and_slash_commands(
     records = [json.loads(line) for line in capsys.readouterr().out.splitlines()]
     assert calls == ["Hello", "Look around"]
     assert records[0]["conversation"]["model"] == "chat"
+    assert records[0]["input"] == records[0]["conversation"]["input"]
+    assert records[0]["input"]["source"] == "console.argument"
+    assert records[0]["input"]["provider"] is None
+    assert records[0]["input"]["model"] is None
     assert records[1]["scene_status"] == "unavailable"
     assert json.loads(records[2]["text"])["visual"] is None
     assert records[3]["status"] == "stopped"
