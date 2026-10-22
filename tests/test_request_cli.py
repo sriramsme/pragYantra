@@ -98,7 +98,7 @@ def test_opt_in_chat_preserves_judgment_and_conversation_and_slash_commands(
             "-m",
             "Look around",
             "-m",
-            "/calc 2+2",
+            "/context",
             "-m",
             "/stop",
             "-m",
@@ -111,7 +111,7 @@ def test_opt_in_chat_preserves_judgment_and_conversation_and_slash_commands(
     assert calls == ["Hello", "Look around"]
     assert records[0]["conversation"]["model"] == "chat"
     assert records[1]["scene_status"] == "unavailable"
-    assert records[2]["text"] == "4"
+    assert json.loads(records[2]["text"])["visual"] is None
     assert records[3]["status"] == "stopped"
     assert events[-2:] == ["interpreter closed", "conversation closed"]
 

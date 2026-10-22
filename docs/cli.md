@@ -53,7 +53,6 @@ prag listen recording.wav                # transcribe a WAV file
 prag speak 'Hello'                        # synthesize and play
 prag speak 'Hello' -o data/hello.wav       # save WAV without playback
 prag devices                             # enumerate audio devices
-prag calc 'sqrt(16) + 2**3'               # local arithmetic
 prag inspect photo.jpg --condition 'Is a red mug visible?' -j
 prag profile set name user Casey          # explicitly save companion context
 prag demo -j                             # simulation as JSON lines

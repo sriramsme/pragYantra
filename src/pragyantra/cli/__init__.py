@@ -295,11 +295,6 @@ def _run(argv: list[str], *, prog: str) -> None:
 
             run_profile(args) if args.command == "profile" else run_memory(args)
             return
-        if args.command == "calc":
-            from pragyantra.application.actions import calculate
-
-            print(calculate(args.expression))
-            return
         if args.command == "watch":
             from pragyantra.cli.vision import watch
 

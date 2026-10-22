@@ -15,7 +15,7 @@ from pragyantra.application.models import ImageFrame, SceneDescription, TextObse
 from pragyantra.providers import openai_services
 
 
-def test_local_script_persists_explicit_memory_and_calculates(tmp_path):
+def test_local_script_persists_and_recalls_explicit_memory(tmp_path):
     database = tmp_path / "notes.sqlite"
     result = subprocess.run(
         [
@@ -29,7 +29,7 @@ def test_local_script_persists_explicit_memory_and_calculates(tmp_path):
             "--message",
             "/remember The blue mug is mine",
             "--message",
-            "/calc 2 + 3*4",
+            "/recall mug",
             "--json",
         ],
         capture_output=True,
@@ -37,7 +37,7 @@ def test_local_script_persists_explicit_memory_and_calculates(tmp_path):
         check=True,
     )
     records = [json.loads(line) for line in result.stdout.splitlines()]
-    assert records[1]["text"] == "14"
+    assert "The blue mug is mine" in records[1]["text"]
     lookup = subprocess.run(
         [
             sys.executable,

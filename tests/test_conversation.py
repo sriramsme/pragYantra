@@ -61,9 +61,6 @@ def test_commands_never_call_model_and_notes_can_be_forgotten():
     async def scenario():
         provider = Provider()
         session = ConversationSession(provider, now=lambda: NOW)
-        assert (
-            await session.respond(message("/calc sqrt(16) + 2**3"))
-        ).reply.text == "12.0"
         await session.respond(message("/remember A blue door"))
         assert (
             "blue door" in (await session.respond(message("/recall door"))).reply.text
@@ -110,25 +107,6 @@ def test_sensor_order_capacity_and_nonfinite_values():
     for value in (True, float("nan"), float("inf")):
         with pytest.raises(ValueError, match="finite"):
             SensorObservation("mcu", NOW, "temperature", value, "degC")
-
-
-@pytest.mark.parametrize(
-    "expression",
-    [
-        "__import__('os')",
-        "(1).__class__",
-        "2**10000",
-        "1/0",
-        "[x for x in range(10)]",
-        "True",
-        "1e999",
-    ],
-)
-def test_calculator_rejects_code_and_unbounded_or_undefined_work(expression):
-    from pragyantra.application.actions import calculate
-
-    with pytest.raises(ValueError):
-        calculate(expression)
 
 
 def test_semantic_session_remembers_and_recalls_without_keyword_overlap():

@@ -166,7 +166,7 @@ def test_explicit_commands_and_stop_bypass_judgment_and_stop_closes_stream():
             try:
                 for text in (
                     "/remember A blue mug",
-                    "/calc 2+2",
+                    "/context",
                     "/stop",
                     "never consumed",
                 ):
@@ -181,7 +181,7 @@ def test_explicit_commands_and_stop_bypass_judgment_and_stop_closes_stream():
         await runner.run(inputs(), on_result=output)
         assert interpreter.calls == [] and chat.calls == []
         assert results[-1].status == RequestStatus.STOPPED
-        assert events == ["/remember A blue mug", "/calc 2+2", "/stop", "closed"]
+        assert events == ["/remember A blue mug", "/context", "/stop", "closed"]
         assert len(session.notes.search("mug")) == 1
 
     asyncio.run(scenario())

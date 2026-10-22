@@ -81,7 +81,6 @@ SDK objects stay inside providers.
 | `application/companion.py` | Explicit saved names/preferences/observations, independent of sensor state |
 | `application/conversation.py` | Serialize turns; combine sensory snapshot, notes and history; dispatch explicit commands |
 | `application/memory.py` | Notes, embedding contract/cosine retrieval and bounded complete exchanges |
-| `application/actions.py` | Numeric AST interpreter with explicit operators/functions/bounds |
 | `application/behavior.py`, `runtime.py` | Deterministic touch-to-visual-context behavior and simulated event runtime |
 | `inputs/image.py`, `webcam.py` | Shared image normalization; one-shot and continuous camera acquisition |
 | `inputs/audio.py`, `microphone.py`, `vad.py` | WAV loading, bounded capture, energy endpointing |
@@ -167,7 +166,7 @@ Current service contracts follow official documentation linked from execution gu
 model defaults are parsed; shell variables win. `cli/parser.py` provides consistent
 help/global options. See [CLI usage](cli.md) for the `prag` alias and device defaults.
 
-Explicit `/commands` implement known rules/calculations and note operations.
+Explicit `/commands` implement context, note and companion operations.
 Conversation has no tool/actuator access; generated text is never executed.
 Untrusted context/notes are labeled as data. Optional Jev request interpretation
 (`jev-1.14.0`) supplies a typed judgment; application rules only allow conversation

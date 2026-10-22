@@ -58,7 +58,7 @@ without collecting historical code.
 - `test_device_events.py`: strict version/type/field/unit/value/time validation.
 - `test_openai_services.py`: actual SDK over mock HTTP for conversation, ASR, PCM
   synthesis and embeddings, with errors/timeouts and explicit request settings.
-- `test_assistant_cli.py`: subprocess note persistence/calculation and JSONL events;
+- `test_assistant_cli.py`: subprocess note persistence/recall and JSONL events;
   integrated fake camera + audio + conversation + speech, half-duplex ordering,
   startup/perception/output failure and cancellation cleanup.
 

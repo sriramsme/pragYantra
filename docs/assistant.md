@@ -71,7 +71,6 @@ descriptions; the application prints it rather than creating a session log.
 | Command | Behavior |
 | --- | --- |
 | `/context` | Show timestamped visual/sensor evidence and freshness |
-| `/calc EXPRESSION` | Bounded arithmetic in code; no `eval` or generated code |
 | `/remember TEXT` | Add an explicit note, maximum 2,000 characters |
 | `/recall QUERY` | Recall up to three notes; an empty query lists recent notes |
 | `/forget ID` | Delete that note from the repository |
@@ -84,9 +83,6 @@ descriptions; the application prints it rather than creating a session log.
 
 `--commands-only` disables hosted capabilities and accepts deterministic commands.
 It cannot combine with audio, webcam, spoken output, semantic memory or interpretation.
-`calc` also exists as a standalone command. Arithmetic has bounded syntax, numeric
-size, exponent, and function limits. Constants include `pi`, `e`, `c`, `G`, `h`,
-and `k_B`; values use SI conventions, without dimensional analysis.
 
 History retains complete exchanges within 12 turns and 24,000 characters. Failed
 model responses do not enter history. `/reset` leaves history empty. Forgetting a

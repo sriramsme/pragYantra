@@ -75,7 +75,7 @@ coordinates typed input/results and optional background vision for both the CLI
 and library hosts. Host code opens/closes provider/device contexts; the runner
 owns its task group and active input iterator cleanup. It never constructs clients,
 loads .env, prints or takes ownership of an event loop. See `docs/embedding.md` and
-`examples/embed_assistant.py`. `listen`, `speak`, `devices`, `memory` and `calc`
+`examples/embed_assistant.py`. `listen`, `speak`, `devices`, `memory` and `profile`
 provide focused entry points. Bare `listen` selects microphone; bare `speak TEXT`
 selects playback. `--camera`/`--webcam` accept an optional index (default 0), and
 `--memory` an optional path (data/notes.sqlite); these capabilities remain opt in.
@@ -118,6 +118,8 @@ Keep these semantics unless a requirement explicitly changes them:
 - Deterministic commands dispatch in code; generated conversation has no tools or
   actuator authority. Device JSONL is a strict version-1 observation boundary with
   explicit units/timestamps, not a selected physical transport or controller.
+  The obsolete calculator command and numeric helper were removed; do not restore
+  a generic actions module without a concrete application responsibility.
 - `RequestRouter` optionally interprets natural requests. Only conversation and
   latest-scene reporting have handlers. Follow/mission/natural remember are
   unsupported; slash commands bypass Jev. Low confidence/probability asks for

@@ -6,7 +6,6 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Protocol
 
-from pragyantra.application.actions import calculate
 from pragyantra.application.companion import (
     CompanionEntry,
     CompanionRepository,
@@ -62,7 +61,7 @@ class ConversationResult:
 
 
 HELP = (
-    "Commands: /context, /calc EXPRESSION, /remember TEXT, /recall QUERY, "
+    "Commands: /context, /remember TEXT, /recall QUERY, "
     "/forget ID, /profile [KIND KEY VALUE], /unprofile KIND KEY, /reset, /help, "
     "/quit. /stop ends an AssistantRunner session. "
     "Other input starts a conversation unless request interpretation is enabled."
@@ -137,8 +136,6 @@ class ConversationSession:
             return HELP
         if command == "/context":
             return json.dumps(environment.to_record(), ensure_ascii=False)
-        if command == "/calc":
-            return str(calculate(argument))
         if command == "/remember":
             if not argument or len(argument) > 2000:
                 raise ValueError("Memory requires 1–2000 characters")

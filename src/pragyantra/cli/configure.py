@@ -1,4 +1,4 @@
-"""Command definitions for assistant, audio, local memory, and calculations."""
+"""Command definitions for assistant, perception, audio and explicit memory."""
 
 import os
 from datetime import timedelta
@@ -238,10 +238,6 @@ def add_commands(commands, *, duration, count, timestamp, camera_index):
     commands.add_parser(
         "devices", help="List audio devices without recording or playback"
     )
-    calc = commands.add_parser(
-        "calc", help="Evaluate bounded arithmetic locally, without model inference"
-    )
-    calc.add_argument("expression")
     memory = commands.add_parser(
         "memory", help="Manage explicit local notes; no hosted API"
     )

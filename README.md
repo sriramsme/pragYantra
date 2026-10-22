@@ -7,7 +7,7 @@ memory, and a boundary for physical sensors. It is a modernization of a personal
 The assistant can converse using typed text or transcribed audio, use background
 webcam descriptions and timestamped sensor readings as context, and synthesize
 spoken replies. Explicit notes support persistent keyword recall and optional
-semantic recall. Calculations and memory commands run in application code.
+semantic recall. Explicit memory commands run in application code.
 Explicit names/preferences supplement notes, and direct image inspections return
 bounded predicates, choices or scores independently of generated conversation.
 
@@ -45,7 +45,6 @@ Use `/help` for commands and `/quit` to exit. Local commands work without a key:
 
 ```bash
 prag chat --commands-only \
-  --message '/calc sqrt(16) + 2**3' \
   --message '/remember The blue mug belongs to Alex' \
   --message '/recall mug' --json
 ```
