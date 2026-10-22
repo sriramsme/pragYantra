@@ -2,7 +2,10 @@
 
 `chat` integrates current sensory evidence, recent exchanges, explicit notes, and
 a conversation provider. `demo`, `see`, and `watch` remain independent inspection
-commands. Processes do not share world state.
+commands. Processes do not share world state. The reusable `AssistantRunner`
+coordinates turns/perception; `cli/assistant.py` constructs resources, supplies
+observations and formats results. See [Python embedding](embedding.md) for use
+without a CLI subprocess.
 
 ## Choose inputs
 
@@ -91,7 +94,8 @@ Chat uses a default 30-second per-request deadline, configurable with `--timeout
 This does not bound device acquisition, a complete voice turn, or native shutdown.
 Source/provider/output failures stop the session. A task group cancels ongoing
 foreground work if background perception fails, and cancels perception when input
-ends or Ctrl+C occurs. An exit stack closes acquired resources in reverse order.
+ends or Ctrl+C occurs. The application runner owns that task group and input
+iterator cleanup. The CLI's exit stack closes acquired resources in reverse order.
 A failure during partial startup closes resources already acquired. Device
 workers finish active native operations before release; blocked drivers can delay it.
 

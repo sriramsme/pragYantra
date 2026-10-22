@@ -68,7 +68,12 @@ Touch requests current visual context with missing/stale handling. `see` normali
 a PNG/JPEG/WebP file or captures one webcam frame, then explicitly uploads it to
 OpenAI. `watch` continuously interprets selected webcam frames. `chat` integrates
 text/audio input, optional background vision, scalar sensor events, bounded history,
-explicit notes and optional speech. `listen`, `speak`, `devices`, `memory` and `calc`
+explicit notes and optional speech. `application/runner.py:AssistantRunner`
+coordinates typed input/results and optional background vision for both the CLI
+and library hosts. Host code opens/closes provider/device contexts; the runner
+owns its task group and active input iterator cleanup. It never constructs clients,
+loads .env, prints or takes ownership of an event loop. See `docs/embedding.md` and
+`examples/embed_assistant.py`. `listen`, `speak`, `devices`, `memory` and `calc`
 provide focused entry points. Bare `listen` selects microphone; bare `speak TEXT`
 selects playback. `--camera`/`--webcam` accept an optional index (default 0), and
 `--memory` an optional path (data/notes.sqlite); these capabilities remain opt in.
@@ -93,7 +98,7 @@ Keep these semantics unless a requirement explicitly changes them:
   same source, advancing acquisition time, gap <=30 s by default, description
   <=1000 chars. Never nest context or use response time as frame gap. Label prior
   text as untrusted; current image wins. No quality improvement has been shown.
-- Chat runs foreground turns plus optional background vision in a task group and
+- The reusable runner runs foreground turns plus optional background vision in a task group and
   waits for the first visual result at startup. Failures stop/cancel siblings;
   context managers release resources on completion, partial startup and failure.
   Stdin sensor records wait behind foreground turns/output; no priority sensor

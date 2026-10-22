@@ -102,6 +102,20 @@ PragYantra” or press Ctrl+C to stop. Noise, endpointing, actual device timing,
 sustained reliability still need hardware evaluation. This is not streaming audio
 or speech interruption.
 
+## Embed in another Python application
+
+`AssistantRunner` accepts typed observations and an optional image source, shares
+context with `ConversationSession`, and delivers typed results to an async callback.
+It manages concurrent tasks while the host owns provider/device resources.
+
+```bash
+uv run examples/embed_assistant.py
+```
+
+This runnable example uses a synthetic image and fake providers, with no hardware,
+credentials or subprocess. See [Python embedding](docs/embedding.md) and the
+[implementation roadmap](docs/roadmap.md) for the integration contract and next steps.
+
 ## Sensors and hardware
 
 `chat --events` accepts versioned JSON lines for text, touch, and scalar sensor
@@ -124,6 +138,7 @@ src/pragyantra/
   providers/      OpenAI inference and SQLite persistence
   cli/            Configuration, component construction, command handlers
   __main__.py     Python module entry point
+examples/         Small runnable examples using public application interfaces
 tests/            Deterministic behavior, SDK contracts, CLI and lifecycle tests
 docs/             Execution guides, design choices, experiments and limitations
 ```

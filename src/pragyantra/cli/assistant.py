@@ -6,14 +6,9 @@ import sys
 from contextlib import AsyncExitStack
 from datetime import UTC, datetime
 
-from pragyantra.application.behavior import DescribeOnTouch
-from pragyantra.application.conversation import ConversationSession
-from pragyantra.application.models import (
-    SensorObservation,
-    TextObservation,
-    TouchObservation,
-)
-from pragyantra.application.observation_loop import VisualObservationLoop
+from pragyantra.application.conversation import ConversationResult, ConversationSession
+from pragyantra.application.models import TextObservation
+from pragyantra.application.runner import AssistantResult, AssistantRunner
 from pragyantra.inputs.console import ConsoleInput
 from pragyantra.inputs.events import parse_event
 
@@ -25,7 +20,7 @@ class CommandsOnly:
         )
 
 
-def result_record(result):
+def result_record(result: ConversationResult) -> dict[str, object]:
     return {
         "kind": "conversation",
         "text": result.reply.text,
@@ -81,14 +76,17 @@ async def run_assistant(args):
         if not (args.message or args.audio or args.voice):
             console = await stack.enter_async_context(ConsoleInput())
 
-        vision_ready = asyncio.Event()
-
-        async def observe():
-            observer = VisualObservationLoop(args.vision_interval, state=session.state)
-            async for _ in observer.observations(source, services.vision):
-                vision_ready.set()
-
-        async def output(record):
+        async def output(result: AssistantResult):
+            record = (
+                result_record(result)
+                if isinstance(result, ConversationResult)
+                else {
+                    "kind": "touch_response",
+                    "text": result.text,
+                    "status": result.status.value,
+                    "responded_at": result.responded_at.isoformat(),
+                }
+            )
             text = record["text"]
             if args.json:
                 print(json.dumps(record, ensure_ascii=False), flush=True)
@@ -99,42 +97,19 @@ async def run_assistant(args):
 
                 await speak_text(text, services, device=args.output_device)
 
-        async def handle(event):
-            at = datetime.now(UTC)
-            if event.observed_at > at:
-                raise ValueError("Input event is ahead of the session clock")
-            if isinstance(event, SensorObservation):
-                session.state.observe(event)
-            elif isinstance(event, TouchObservation):
-                response = DescribeOnTouch(args.context_max_age).respond(
-                    session.state, event, at=at
-                )
-                await output(
-                    {
-                        "kind": "touch_response",
-                        "text": response.text,
-                        "status": response.status.value,
-                        "responded_at": response.responded_at.isoformat(),
-                    }
-                )
-            else:
-                await output(result_record(await session.respond(event)))
-
-        async def foreground():
+        async def observations():
             if args.message:
                 for text in args.message:
                     if text.strip() in ("/quit", "/exit"):
                         break
-                    await handle(
-                        TextObservation("console.argument", datetime.now(UTC), text)
-                    )
+                    yield TextObservation("console.argument", datetime.now(UTC), text)
                 return
             if args.audio:
                 from pragyantra.inputs.audio import load_audio
 
                 for path in args.audio:
                     clip = await asyncio.to_thread(load_audio, path)
-                    await handle(await services.transcribe(clip))
+                    yield await services.transcribe(clip)
                 return
             if args.voice:
                 from pragyantra.inputs.microphone import record_microphone
@@ -156,7 +131,7 @@ async def run_assistant(args):
                         "quit pragyantra",
                     ):
                         break
-                    await handle(message)
+                    yield message
                     completed += 1
                 return
             while (line := await console.read()) is not None:
@@ -169,18 +144,16 @@ async def run_assistant(args):
                     if args.events
                     else TextObservation("console", datetime.now(UTC), line)
                 )
-                await handle(event)
+                yield event
 
+        runner = AssistantRunner(
+            session,
+            image_source=source,
+            vision=services.vision if source is not None else None,
+            vision_interval=args.vision_interval,
+        )
         try:
-            async with asyncio.TaskGroup() as group:
-                background = group.create_task(observe()) if source else None
-                try:
-                    if background:
-                        await vision_ready.wait()
-                    await foreground()
-                finally:
-                    if background:
-                        background.cancel()
+            await runner.run(observations(), on_result=output)
         except ExceptionGroup as errors:
             error = errors.exceptions[0]
             while isinstance(error, ExceptionGroup):

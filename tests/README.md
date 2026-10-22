@@ -70,3 +70,9 @@ an automatically executed test or evidence of physical audio-device performance.
   selection with fake handlers. `conftest.py` blocks real sockets and audio devices,
   disables project dotenv loading and removes the ambient API key for normal tests;
   configuration tests explicitly enable only temporary env fixtures.
+
+- `test_assistant_runner.py`: programmatic typed observations/results, initial
+  vision readiness, concurrent perception with frozen conversational snapshots,
+  output backpressure, caller-owned resources, input iterator cleanup, startup and
+  mid-turn failure, cancellation, simultaneous errors and sequential reuse. The
+  runnable embedding example is also checked without credentials or hardware.

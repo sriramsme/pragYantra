@@ -66,6 +66,7 @@ SDK objects stay inside providers.
 | `application/interfaces.py` | Acquisition, vision, transcription, speech and response contracts |
 | `application/world_state.py` | Latest acquired visual scene and bounded scalar channels; frozen evidence snapshots |
 | `application/perception.py`, `observation_loop.py` | Interpret frames, preserve timestamps, pace serial vision, select optional prior context |
+| `application/runner.py` | Reusable typed input/result handling, initial vision readiness and task supervision |
 | `application/conversation.py` | Serialize turns; combine sensory snapshot, notes and history; dispatch explicit commands |
 | `application/memory.py` | Notes, embedding contract/cosine retrieval and bounded complete exchanges |
 | `application/actions.py` | Numeric AST interpreter with explicit operators/functions/bounds |
@@ -107,12 +108,18 @@ relevance nor generated descriptions provide calibrated confidence. See [memory]
 
 ## Concurrency, queues and cleanup
 
-Chat owns a foreground turn loop plus optional independent visual perception in
-an `asyncio.TaskGroup`. The first turn waits for an initial visual result. Vision
+`application/runner.py:AssistantRunner` owns a foreground input/result loop plus
+optional independent visual perception in an `asyncio.TaskGroup`. The CLI creates
+and opens providers/devices, adapts input and formats/plays results; other hosts
+can supply those same capabilities directly. The first turn waits for an initial visual result. Vision
 and conversation can make separate requests concurrently; each capability's
 request sequence is serial. A failing task cancels its sibling. On input EOF,
 finite completion, failure or cancellation, an exit stack closes resources in
-reverse acquisition order. No retries or model fallback hide failures.
+reverse acquisition order. Library hosts own their supplied resource contexts;
+the runner owns its task group and closes an input iterator that offers `aclose`.
+Single errors propagate directly; multiple task failures remain an ExceptionGroup.
+See [embedding](embedding.md) for the runnable example and ownership contract.
+No retries or model fallback hide failures.
 
 `WebcamStream` owns open/read/release on one dedicated camera worker. Its producer
 replaces one pending raw frame; only selected frames are normalized. The visual
@@ -168,3 +175,9 @@ recorded in the [retirement audit](legacy-retirement.md). Sustained operation,
 real microphone/speaker tests, representative model evaluation, resource/timing
 measurements and ARM deployment remain outstanding. None is implied by package
 checks or removing obsolete code.
+
+## Next milestones
+
+See [the implementation roadmap](roadmap.md) for bounded request interpretation,
+direct inspection judgments, companion context and evaluation. The reusable runner
+is implemented; decision providers and typed robot behavior requests remain planned.
